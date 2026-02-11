@@ -1,0 +1,1885 @@
+openapi: 3.0.0
+paths:
+  /health:
+    get:
+      operationId: ApiGatewayController_healthCheck
+      parameters: []
+      responses:
+        "200":
+          description: Service is healthy
+      summary: Health check endpoint
+      tags:
+        - Gateway
+  /auth/health:
+    get:
+      operationId: AuthController_healthCheck
+      parameters: []
+      responses:
+        "200":
+          description: Auth service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: auth
+      summary: Health check for auth service
+      tags:
+        - Auth
+  /auth/register:
+    post:
+      description: Creates a new user account and sends verification email.
+      operationId: AuthController_register
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequestDto"
+      responses:
+        "201":
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RegisterResponseDto"
+        "400":
+          description: Invalid input data
+        "409":
+          description: Email already registered
+      summary: Register a new user
+      tags:
+        - Auth
+  /auth/verify-email:
+    post:
+      description: Verifies user email using the token sent in the verification email.
+      operationId: AuthController_verifyEmailPost
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailRequestDto"
+      responses:
+        "200":
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyEmailResponseDto"
+        "400":
+          description: Invalid token or token expired
+        "409":
+          description: Email is already verified
+      summary: Verify user email address
+      tags:
+        - Auth
+    get:
+      description: >-
+        Verifies user email using the token from query parameter (for clicking
+        email links).
+      operationId: AuthController_verifyEmailGet
+      parameters:
+        - name: token
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyEmailResponseDto"
+        "400":
+          description: Invalid token or token expired
+        "409":
+          description: Email is already verified
+      summary: Verify user email address via link
+      tags:
+        - Auth
+  /auth/login:
+    post:
+      description: >-
+        Authenticates user with email and password, returns JWT access token and
+        refresh token.
+      operationId: AuthController_login
+      parameters:
+        - name: user-agent
+          required: true
+          in: header
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequestDto"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponseDto"
+        "400":
+          description: Invalid input data
+        "401":
+          description: Invalid credentials
+        "429":
+          description: Too many failed login attempts
+      summary: Login with email and password
+      tags:
+        - Auth
+  /auth/refresh:
+    post:
+      description: Generates a new access token using a valid refresh token.
+      operationId: AuthController_refresh
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequestDto"
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshResponseDto"
+        "401":
+          description: Invalid or expired refresh token
+      summary: Refresh access token
+      tags:
+        - Auth
+  /auth/logout:
+    post:
+      description: Logs out the user, invalidates tokens, and clears session.
+      operationId: AuthController_logout
+      parameters: []
+      responses:
+        "200":
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResponseDto"
+      summary: Logout user
+      tags:
+        - Auth
+  /auth/forgot-password:
+    post:
+      description: Sends a password reset email to the user if the account exists.
+      operationId: AuthController_forgotPassword
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPasswordRequestDto"
+      responses:
+        "200":
+          description: Request processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ForgotPasswordResponseDto"
+        "429":
+          description: Too many requests. Try again later.
+      summary: Request password reset
+      tags:
+        - Auth
+  /auth/reset-password:
+    post:
+      description: >-
+        Resets user password using the token from email. All existing sessions
+        will be invalidated.
+      operationId: AuthController_resetPassword
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResetPasswordRequestDto"
+      responses:
+        "200":
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResetPasswordResponseDto"
+        "400":
+          description: Invalid or expired token, or weak password
+      summary: Reset password
+      tags:
+        - Auth
+  /auth/sessions:
+    get:
+      operationId: AuthController_getSessions
+      parameters: []
+      responses:
+        "200":
+          description: Sessions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetSessionsResponseDto"
+      summary: List all active sessions
+      tags:
+        - Auth
+  /auth/sessions/{sessionId}:
+    delete:
+      operationId: AuthController_revokeSession
+      parameters:
+        - name: sessionId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Session revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevokeSessionResponseDto"
+      summary: Revoke a session
+      tags:
+        - Auth
+  /users/health:
+    get:
+      operationId: UserController_healthCheck
+      parameters: []
+      responses:
+        "200":
+          description: Returns service health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+      summary: Check user service health
+      tags:
+        - User
+  /users/me:
+    get:
+      operationId: UserController_getMe
+      parameters: []
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserProfileResponseDto"
+        "401":
+          description: Invalid or expired token
+        "404":
+          description: User does not exist
+      security:
+        - bearer: []
+      summary: Get current user profile
+      tags:
+        - User
+    put:
+      operationId: UserController_updateProfile
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserProfileDto"
+      responses:
+        "200":
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserProfileResponseDto"
+        "401":
+          description: Invalid or expired token
+      security:
+        - bearer: []
+      summary: Update current user profile
+      tags:
+        - User
+  /users/me/avatar:
+    post:
+      operationId: UserController_uploadAvatar
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Avatar uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AvatarUploadResponseDto"
+        "401":
+          description: Invalid or expired token
+      security:
+        - bearer: []
+      summary: Upload user avatar
+      tags:
+        - User
+  /users/{userId}/status:
+    put:
+      operationId: UserController_updateStatus
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserStatusDto"
+      responses:
+        "200":
+          description: User status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserStatusResponseDto"
+        "401":
+          description: Invalid or expired token
+      security:
+        - bearer: []
+      summary: Update user status
+      tags:
+        - User
+    get:
+      operationId: UserController_getUserStatus
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserStatusResponseDto"
+        "401":
+          description: Invalid or expired token
+        "404":
+          description: User does not exist
+      security:
+        - bearer: []
+      summary: Get user online status
+      tags:
+        - User
+  /users/online:
+    get:
+      operationId: UserController_getOnlineUsers
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Number of items to return
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Number of items to skip
+          schema:
+            minimum: 0
+            default: 0
+            type: number
+      responses:
+        "200":
+          description: List of online users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOnlineUsersResponseDto"
+        "401":
+          description: Invalid or expired token
+      security:
+        - bearer: []
+      summary: Get online users
+      tags:
+        - User
+  /users/search:
+    get:
+      operationId: UserController_searchUsers
+      parameters:
+        - name: query
+          required: false
+          in: query
+          description: Search query (name, email, bio)
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Limit number of results
+          schema:
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Offset results
+          schema:
+            default: 0
+            type: number
+      responses:
+        "200":
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserProfileDto"
+                  total:
+                    type: number
+        "401":
+          description: Invalid or expired token
+      security:
+        - bearer: []
+      summary: Search users
+      tags:
+        - User
+  /users/{userId}:
+    get:
+      operationId: UserController_getUserProfile
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserProfileResponseDto"
+        "401":
+          description: Invalid or expired token
+        "404":
+          description: User does not exist
+      security:
+        - bearer: []
+      summary: Get user profile by ID
+      tags:
+        - User
+  /email/health:
+    get:
+      operationId: EmailController_healthCheck
+      parameters: []
+      responses:
+        "200":
+          description: Returns service health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+      summary: Check email service health
+      tags:
+        - Email
+  /message/health:
+    get:
+      operationId: MessageController_healthCheck
+      parameters: []
+      responses:
+        "200":
+          description: Returns service health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+      summary: Check message service health
+      tags:
+        - Message
+  /message:
+    post:
+      operationId: MessageController_createMessage
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMessageDto"
+      responses:
+        "201":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponseDto"
+      security:
+        - bearer: []
+      summary: Send a direct message
+      tags:
+        - Message
+  /message/conversations:
+    get:
+      operationId: MessageController_getConversations
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Number of conversations to retrieve
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Number of conversations to skip
+          schema:
+            minimum: 0
+            default: 0
+            type: number
+      responses:
+        "200":
+          description: Returns list of conversations with latest message preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetConversationsResponseDto"
+      security:
+        - bearer: []
+      summary: Get list of conversations
+      tags:
+        - Message
+  /message/unread:
+    get:
+      operationId: MessageController_getUnreadCount
+      parameters: []
+      responses:
+        "200":
+          description: Returns count of unread messages across all conversations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUnreadCountResponseDto"
+      security:
+        - bearer: []
+      summary: Get count of unread messages
+      tags:
+        - Message
+  /message/{userId}:
+    get:
+      operationId: MessageController_getMessages
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          description: ID of the other user
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Number of messages to retrieve
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Number of messages to skip
+          schema:
+            minimum: 0
+            default: 0
+            type: number
+      responses:
+        "200":
+          description: Returns message history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetMessagesResponseDto"
+      security:
+        - bearer: []
+      summary: Get conversation history with another user
+      tags:
+        - Message
+  /message/{messageId}:
+    delete:
+      operationId: MessageController_deleteMessage
+      parameters:
+        - name: messageId
+          required: true
+          in: path
+          description: ID of the message to delete
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Message deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteMessageResponseDto"
+      security:
+        - bearer: []
+      summary: Delete a message
+      tags:
+        - Message
+  /message/{userId}/search:
+    get:
+      operationId: MessageController_searchMessages
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          description: ID of the other user
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Number of messages to retrieve
+          schema:
+            minimum: 1
+            maximum: 100
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Number of messages to skip
+          schema:
+            minimum: 0
+            default: 0
+            type: number
+        - name: query
+          required: true
+          in: query
+          description: Search query string
+          schema:
+            minLength: 1
+            example: Hello
+            type: string
+      responses:
+        "200":
+          description: ""
+      security:
+        - bearer: []
+      summary: Search messages in conversation
+      tags:
+        - Message
+  /message/{messageId}/like:
+    post:
+      operationId: MessageController_likeMessage
+      parameters:
+        - name: messageId
+          required: true
+          in: path
+          description: ID of the message to like
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Message liked successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeMessageResponseDto"
+        "400":
+          description: Message already liked
+        "404":
+          description: Message not found
+      security:
+        - bearer: []
+      summary: Like a message
+      tags:
+        - Message
+    delete:
+      operationId: MessageController_unlikeMessage
+      parameters:
+        - name: messageId
+          required: true
+          in: path
+          description: ID of the message to unlike
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Message unliked successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeMessageResponseDto"
+        "400":
+          description: Message not liked yet
+        "404":
+          description: Message not found
+      security:
+        - bearer: []
+      summary: Unlike a message
+      tags:
+        - Message
+  /posts/health:
+    get:
+      operationId: PostController_healthCheck
+      parameters: []
+      responses:
+        "200":
+          description: Returns service health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+      security:
+        - bearer: []
+      summary: Check post service health
+      tags:
+        - Posts
+  /posts:
+    post:
+      operationId: PostController_createPost
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "201":
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostResponseDto"
+      security:
+        - bearer: []
+      summary: Create a new post
+      tags:
+        - Posts
+    get:
+      operationId: PostController_getPosts
+      parameters:
+        - name: limit
+          required: false
+          in: query
+          description: Number of posts to return
+          schema:
+            minimum: 1
+            default: 10
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Offset for pagination
+          schema:
+            minimum: 0
+            default: 0
+            type: number
+      responses:
+        "200":
+          description: Returns paginated posts with author info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFeedResponseDto"
+      security:
+        - bearer: []
+      summary: Get posts feed
+      tags:
+        - Posts
+  /posts/{id}:
+    get:
+      operationId: PostController_getPost
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns post with author info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedPostResponseDto"
+      security:
+        - bearer: []
+      summary: Get single post
+      tags:
+        - Posts
+  /posts/user/{userId}:
+    get:
+      operationId: PostController_getUserPosts
+      parameters:
+        - name: userId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Number of posts to return
+          schema:
+            minimum: 1
+            default: 10
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Offset for pagination
+          schema:
+            minimum: 0
+            default: 0
+            type: number
+        - name: authorId
+          required: false
+          in: query
+          description: Filter posts by author ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns paginated user posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFeedResponseDto"
+      security:
+        - bearer: []
+      summary: Get user posts
+      tags:
+        - Posts
+  /posts/{id}/like:
+    post:
+      operationId: PostController_likePost
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Post liked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  postId:
+                    type: string
+                  likes:
+                    type: number
+      security:
+        - bearer: []
+      summary: Like a post
+      tags:
+        - Posts
+    delete:
+      operationId: PostController_unlikePost
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Post unliked successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  postId:
+                    type: string
+                  likes:
+                    type: number
+      security:
+        - bearer: []
+      summary: Unlike a post
+      tags:
+        - Posts
+  /posts/{id}/likes:
+    get:
+      operationId: PostController_getPostLikes
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: limit
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: offset
+          required: true
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Returns paginated list of users who liked the post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetPostLikesResponseDto"
+      security:
+        - bearer: []
+      summary: Get users who liked a post
+      tags:
+        - Posts
+  /file/health:
+    get:
+      operationId: FileController_healthCheck
+      parameters: []
+      responses:
+        "200":
+          description: Returns service health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  service:
+                    type: string
+      summary: Check file service health
+      tags:
+        - File
+info:
+  title: Social Network API Gateway
+  description: API Gateway for Social Network Microservices
+  version: "1.0"
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    RegisterRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example: john@company.com
+          description: User email address
+        password:
+          type: string
+          example: SecurePass123!
+          description: Password (min 8 chars, alphanumeric + special)
+        firstName:
+          type: string
+          example: John
+          description: First name
+        lastName:
+          type: string
+          example: Doe
+          description: Last name
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+    RegisterResponseData:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          example: john@company.com
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        message:
+          type: string
+          example: Verification email sent. Please check your inbox.
+      required:
+        - userId
+        - email
+        - firstName
+        - lastName
+        - message
+    RegisterErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: EMAIL_ALREADY_EXISTS
+        message:
+          type: string
+          example: User with this email already exists
+      required:
+        - code
+        - message
+    RegisterResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/RegisterResponseData"
+        error:
+          $ref: "#/components/schemas/RegisterErrorDto"
+      required:
+        - success
+        - data
+    VerifyEmailRequestDto:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Email verification token sent to user email
+          example: abcd1234efgh5678ijkl9012mnop3456
+      required:
+        - token
+    VerifyEmailDataDto:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: Email verified successfully
+        email:
+          type: string
+          description: Verified email address
+          example: john@company.com
+        canLogin:
+          type: boolean
+          description: Whether user can now login
+          example: true
+      required:
+        - message
+        - email
+        - canLogin
+    VerifyEmailErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: TOKEN_INVALID
+        message:
+          type: string
+          example: Verification token is invalid or expired
+      required:
+        - code
+        - message
+    VerifyEmailResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Operation success status
+          example: true
+        data:
+          description: Verification data
+          allOf:
+            - $ref: "#/components/schemas/VerifyEmailDataDto"
+        error:
+          description: Error details if operation failed
+          allOf:
+            - $ref: "#/components/schemas/VerifyEmailErrorDto"
+      required:
+        - success
+    LoginRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User email address
+          example: john@company.com
+        password:
+          type: string
+          description: User password
+          example: SecurePass123!
+        deviceName:
+          type: string
+          description: Device name for session tracking
+          example: Chrome on Windows
+      required:
+        - email
+        - password
+    LoginDataDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          description: Opaque refresh token
+          example: opaque-refresh-token-string-random
+        expiresIn:
+          type: number
+          description: Access token expiration time in seconds
+          example: 900
+        userId:
+          type: string
+          description: User ID
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+        email:
+          type: string
+          description: User email
+          example: john@company.com
+      required:
+        - accessToken
+        - refreshToken
+        - expiresIn
+        - userId
+        - email
+    LoginErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: INVALID_CREDENTIALS
+        message:
+          type: string
+          description: Error message
+          example: Email or password incorrect
+      required:
+        - code
+        - message
+    LoginResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the login was successful
+          example: true
+        data:
+          description: Login data
+          allOf:
+            - $ref: "#/components/schemas/LoginDataDto"
+        error:
+          description: Error details if login failed
+          allOf:
+            - $ref: "#/components/schemas/LoginErrorDto"
+      required:
+        - success
+    RefreshRequestDto:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh token
+          example: opaque-refresh-token-string
+      required:
+        - refreshToken
+    RefreshDataDto:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: New JWT access token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: number
+          description: Access token expiration time in seconds
+          example: 900
+      required:
+        - accessToken
+        - expiresIn
+    RefreshErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: INVALID_REFRESH_TOKEN
+        message:
+          type: string
+          description: Error message
+          example: Refresh token is invalid or expired
+      required:
+        - code
+        - message
+    RefreshResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Indicates if the refresh was successful
+          example: true
+        data:
+          description: Refresh data
+          allOf:
+            - $ref: "#/components/schemas/RefreshDataDto"
+        error:
+          description: Error details if refresh failed
+          allOf:
+            - $ref: "#/components/schemas/RefreshErrorDto"
+      required:
+        - success
+    LogoutResponseDataDto:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Logged out successfully
+      required:
+        - message
+    LogoutResponseErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: TOKEN_INVALID
+        message:
+          type: string
+          example: Token is already blacklisted or invalid
+      required:
+        - code
+        - message
+    LogoutResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/LogoutResponseDataDto"
+        error:
+          $ref: "#/components/schemas/LogoutResponseErrorDto"
+      required:
+        - success
+    ForgotPasswordRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          example: john@company.com
+          description: Email address of the user requesting password reset
+      required:
+        - email
+    ForgotPasswordResponseDto:
+      type: object
+      properties:
+        message:
+          type: string
+          example: If an account exists, a password reset email will be sent
+          description: Status message
+      required:
+        - message
+    ResetPasswordRequestDto:
+      type: object
+      properties:
+        token:
+          type: string
+          description: The password reset token from email
+          example: abcd1234efgh5678ijkl9012mnop3456
+        newPassword:
+          type: string
+          description: >-
+            New password (min 8 chars, uppercase, lowercase, number, special
+            char)
+          example: NewSecurePass456!
+          minLength: 8
+      required:
+        - token
+        - newPassword
+    ResetPasswordResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Success status
+          example: true
+        data:
+          type: object
+          description: Response data
+          example:
+            message: Password reset successfully. You can now login.
+      required:
+        - success
+        - data
+    SessionDeviceDto:
+      type: object
+      properties:
+        userAgent:
+          type: string
+          example: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+        name:
+          type: string
+          example: Chrome on Windows
+        ip:
+          type: string
+          example: 192.168.1.100
+      required:
+        - userAgent
+        - name
+        - ip
+    SessionDto:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        device:
+          $ref: "#/components/schemas/SessionDeviceDto"
+        lastActivityAt:
+          format: date-time
+          type: string
+          example: "2026-01-21T11:30:00Z"
+        createdAt:
+          format: date-time
+          type: string
+          example: "2026-01-20T10:30:00Z"
+        isCurrent:
+          type: boolean
+          example: true
+      required:
+        - sessionId
+        - device
+        - lastActivityAt
+        - createdAt
+        - isCurrent
+    GetSessionsResponseDataDto:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionDto"
+      required:
+        - sessions
+    GetSessionsResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/GetSessionsResponseDataDto"
+      required:
+        - success
+        - data
+    RevokeSessionResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          example:
+            message: Session revoked successfully
+      required:
+        - success
+        - data
+    UserProfileDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: User ID
+        firstName:
+          type: string
+          description: First name
+        lastName:
+          type: string
+          description: Last name
+        avatarUrl:
+          type: object
+          description: Avatar URL
+          nullable: true
+        bio:
+          type: object
+          description: User bio
+          nullable: true
+        status:
+          type: string
+          description: User status
+          enum:
+            - online
+            - offline
+            - away
+        lastActivityAt:
+          type: object
+          description: Last activity date
+          nullable: true
+        createdAt:
+          format: date-time
+          type: string
+          description: Account creation date
+      required:
+        - userId
+        - firstName
+        - lastName
+        - status
+        - createdAt
+    GetUserProfileResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/UserProfileDto"
+      required:
+        - success
+        - data
+    UpdateUserProfileDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: John
+          description: User first name
+        lastName:
+          type: string
+          example: Doe
+          description: User last name
+        bio:
+          type: string
+          example: Senior Engineer
+          description: User bio (max 500 chars)
+    AvatarUploadResponseDto:
+      type: object
+      properties:
+        avatarUrl:
+          type: string
+          description: The URL of the uploaded avatar
+        message:
+          type: string
+          description: Success message
+      required:
+        - avatarUrl
+        - message
+    UpdateUserStatusDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - online
+            - offline
+            - away
+          example: online
+      required:
+        - status
+    UserStatusResponseDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - online
+            - offline
+            - away
+          example: online
+        lastActivityAt:
+          type: object
+          example: "2026-01-21T11:30:00Z"
+          nullable: true
+      required:
+        - status
+        - lastActivityAt
+    OnlineUserDto:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        avatarUrl:
+          type: object
+          example: https://s3.amazonaws.com/avatars/550e8400.jpg
+          nullable: true
+        status:
+          type: string
+          example: online
+        lastActivityAt:
+          type: object
+          example: "2026-01-21T11:30:00Z"
+      required:
+        - userId
+        - firstName
+        - lastName
+        - avatarUrl
+        - status
+        - lastActivityAt
+    GetOnlineUsersResponseDto:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/OnlineUserDto"
+        total:
+          type: number
+          example: 145
+        limit:
+          type: number
+          example: 20
+        offset:
+          type: number
+          example: 0
+      required:
+        - users
+        - total
+        - limit
+        - offset
+    CreateMessageDto:
+      type: object
+      properties:
+        recipientId:
+          type: string
+          description: ID of the recipient user
+          example: 550e8400-e29b-41d4-a716-446655440000
+        content:
+          type: string
+          description: Content of the message
+          example: Hello, how are you?
+          minLength: 1
+          maxLength: 2000
+      required:
+        - recipientId
+        - content
+    MessageResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 770e8400-e29b-41d4-a716-446655440002
+        senderId:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        recipientId:
+          type: string
+          example: 660e8400-e29b-41d4-a716-446655440001
+        content:
+          type: string
+          example: Hi Jane! How are you?
+        createdAt:
+          format: date-time
+          type: string
+          example: "2026-01-21T11:40:00Z"
+        likesCount:
+          type: number
+          example: 5
+        isLiked:
+          type: boolean
+          example: true
+      required:
+        - id
+        - senderId
+        - recipientId
+        - content
+        - createdAt
+    LastMessageDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 770e8400-e29b-41d4-a716-446655440002
+        content:
+          type: string
+          example: Hi Jane! How are you?
+        senderId:
+          type: string
+          example: 550e8400-e29b-41d4-a716-446655440000
+        createdAt:
+          format: date-time
+          type: string
+          example: "2026-01-21T11:40:00Z"
+      required:
+        - id
+        - content
+        - senderId
+        - createdAt
+    ConversationPreviewDto:
+      type: object
+      properties:
+        partnerId:
+          type: string
+          example: 660e8400-e29b-41d4-a716-446655440001
+          description: ID of the conversation partner
+        lastMessage:
+          $ref: "#/components/schemas/LastMessageDto"
+        unreadCount:
+          type: number
+          example: 5
+          description: Number of unread messages
+      required:
+        - partnerId
+        - lastMessage
+        - unreadCount
+    GetConversationsResponseDto:
+      type: object
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationPreviewDto"
+        total:
+          type: number
+          example: 15
+          description: Total number of conversations
+      required:
+        - conversations
+        - total
+    GetUnreadCountResponseDto:
+      type: object
+      properties:
+        unreadCount:
+          type: number
+          description: Total count of unread messages across all conversations
+          example: 5
+      required:
+        - unreadCount
+    GetMessagesResponseDto:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/MessageResponseDto"
+        total:
+          type: number
+          example: 42
+        limit:
+          type: number
+          example: 20
+        offset:
+          type: number
+          example: 0
+      required:
+        - messages
+        - total
+        - limit
+        - offset
+    DeleteMessageResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the deletion was successful
+          example: true
+      required:
+        - success
+    LikeMessageResponseDto:
+      type: object
+      properties:
+        messageId:
+          type: string
+          example: 770e8400-e29b-41d4-a716-446655440002
+          description: ID of the liked message
+        likes:
+          type: number
+          example: 5
+          description: Total number of likes on the message
+      required:
+        - messageId
+        - likes
+    PostFileDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: File ID
+        url:
+          type: string
+          description: File URL
+      required:
+        - id
+        - url
+    PostResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Post ID
+        content:
+          type: string
+          description: Post content
+        authorId:
+          type: string
+          description: Author ID
+        likesCount:
+          type: number
+          description: Number of likes
+        isLiked:
+          type: boolean
+          description: Is liked by current user
+        createdAt:
+          format: date-time
+          type: string
+          description: Creation date
+        updatedAt:
+          format: date-time
+          type: string
+          description: Update date
+        files:
+          description: Attached files
+          type: array
+          items:
+            $ref: "#/components/schemas/PostFileDto"
+      required:
+        - id
+        - content
+        - authorId
+        - likesCount
+        - isLiked
+        - createdAt
+        - updatedAt
+        - files
+    FeedPostResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Post ID
+        content:
+          type: string
+          description: Post content
+        authorId:
+          type: string
+          description: Author ID
+        likesCount:
+          type: number
+          description: Number of likes
+        isLiked:
+          type: boolean
+          description: Is liked by current user
+        createdAt:
+          format: date-time
+          type: string
+          description: Creation date
+        updatedAt:
+          format: date-time
+          type: string
+          description: Update date
+        files:
+          description: Attached files
+          type: array
+          items:
+            $ref: "#/components/schemas/PostFileDto"
+        author:
+          $ref: "#/components/schemas/UserProfileDto"
+      required:
+        - id
+        - content
+        - authorId
+        - likesCount
+        - isLiked
+        - createdAt
+        - updatedAt
+        - files
+    GetFeedResponseDto:
+      type: object
+      properties:
+        posts:
+          description: List of posts
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedPostResponseDto"
+        total:
+          type: number
+          description: Total number of posts
+      required:
+        - posts
+        - total
+    GetPostLikesResponseDto:
+      type: object
+      properties:
+        users:
+          description: List of users who liked the post
+          type: array
+          items:
+            $ref: "#/components/schemas/UserProfileDto"
+        total:
+          type: number
+          description: Total number of likes
+      required:
+        - users
+        - total

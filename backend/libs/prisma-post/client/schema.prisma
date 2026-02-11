@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../libs/prisma-post/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POST_DATABASE_URL")
+}
+
+model Post {
+  id         String     @id @default(uuid())
+  authorId   String
+  content    String
+  likesCount Int        @default(0)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  files      PostFile[]
+  likes      Like[]
+}
+
+model PostFile {
+  id     String @id @default(uuid())
+  postId String
+  url    String
+  post   Post   @relation(fields: [postId], references: [id])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+
+  @@unique([postId, userId])
+}

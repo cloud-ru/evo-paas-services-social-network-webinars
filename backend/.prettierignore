@@ -1,0 +1,15 @@
+# Generated Prisma client
+libs/prisma-auth
+libs/prisma-user
+libs/prisma-message
+libs/prisma-post
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Lock files
+yarn.lock
+package-lock.json

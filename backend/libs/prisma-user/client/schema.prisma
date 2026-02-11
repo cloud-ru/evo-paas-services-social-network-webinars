@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../libs/prisma-user/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("USER_DATABASE_URL")
+}
+
+model UserProfile {
+  id             String    @id @default(uuid())
+  userId         String    @unique @map("user_id")
+  email          String
+  firstName      String    @map("first_name")
+  lastName       String    @map("last_name")
+  avatarUrl      String?   @map("avatar_url")
+  bio            String?
+  status         String    @default("offline") // online, offline, away
+  lastActivityAt DateTime? @map("last_activity_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([firstName])
+  @@index([lastName])
+  @@index([email])
+  @@map("user_profiles")
+}
