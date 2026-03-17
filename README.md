@@ -27,14 +27,24 @@
 
 ### 1. Запуск Бэкенда
 
-Перейдите в директорию `backend`, установите зависимости и запустите сервисы через Docker Compose:
+**Предварительная настройка:**
+Замените `registry_name` на имя вашего репозитория в Artifact Registry во всех Dockerfile и скриптах деплоя.
+
+**Деплой базовых образов (обязательно):**
+```bash
+cd backend
+yarn docker:deploy-requirements
+```
+
+Эта команда соберет и отправит базовые образы (`base-build` и `base-run`) в реестр `registry_name.cr.cloud.ru`.
+
+Перейдите в директорию `backend`, установите зависимости, настройте переменные окружения и запустите сервисы:
 
 ```bash
 cd backend
-yarn install
+yarn
 cp env.example .env
-# Настройте .env при необходимости
-docker-compose up --build -d
+yarn start
 ```
 
 Это поднимет все микросервисы, базы данных PostgreSQL и MinIO.
