@@ -140,7 +140,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\cloud_ru\\social-network-microservices\\libs\\prisma-post\\client",
+      "value": "C:\\repos\\evo-paas-services-social-network-webinars\\backend\\libs\\prisma-post\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -151,10 +151,14 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\cloud_ru\\social-network-microservices\\apps\\post\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\repos\\evo-paas-services-social-network-webinars\\backend\\apps\\post\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -177,8 +181,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../../../libs/prisma-post/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"POST_DATABASE_URL\")\n}\n\nmodel Post {\n  id         String     @id @default(uuid())\n  authorId   String\n  content    String\n  likesCount Int        @default(0)\n  createdAt  DateTime   @default(now())\n  updatedAt  DateTime   @updatedAt\n  files      PostFile[]\n  likes      Like[]\n}\n\nmodel PostFile {\n  id     String @id @default(uuid())\n  postId String\n  url    String\n  post   Post   @relation(fields: [postId], references: [id])\n}\n\nmodel Like {\n  id        String   @id @default(uuid())\n  postId    String\n  userId    String\n  createdAt DateTime @default(now())\n  post      Post     @relation(fields: [postId], references: [id])\n\n  @@unique([postId, userId])\n}\n",
-  "inlineSchemaHash": "2f66b73d171378fa838d8a102d57b703f72b67270ea0593157b42da54c8bc440",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n  output        = \"../../../libs/prisma-post/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"POST_DATABASE_URL\")\n}\n\nmodel Post {\n  id         String     @id @default(uuid())\n  authorId   String\n  content    String\n  likesCount Int        @default(0)\n  createdAt  DateTime   @default(now())\n  updatedAt  DateTime   @updatedAt\n  files      PostFile[]\n  likes      Like[]\n}\n\nmodel PostFile {\n  id     String @id @default(uuid())\n  postId String\n  url    String\n  post   Post   @relation(fields: [postId], references: [id])\n}\n\nmodel Like {\n  id        String   @id @default(uuid())\n  postId    String\n  userId    String\n  createdAt DateTime @default(now())\n  post      Post     @relation(fields: [postId], references: [id])\n\n  @@unique([postId, userId])\n}\n",
+  "inlineSchemaHash": "58e281e5af601cbf96719c07967137f43c80bc79adcc6d68a2594f4ca2577c3b",
   "copyEngine": true
 }
 
@@ -218,6 +222,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "libs/prisma-post/client/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-linux-musl-openssl-3.0.x.so.node");
+path.join(process.cwd(), "libs/prisma-post/client/libquery_engine-linux-musl-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "libs/prisma-post/client/schema.prisma")

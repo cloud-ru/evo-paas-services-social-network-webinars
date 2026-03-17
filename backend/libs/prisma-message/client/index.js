@@ -154,7 +154,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\cloud_ru\\social-network-microservices\\libs\\prisma-message\\client",
+      "value": "C:\\repos\\evo-paas-services-social-network-webinars\\backend\\libs\\prisma-message\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -165,12 +165,16 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
       }
     ],
     "previewFeatures": [
       "fullTextSearch"
     ],
-    "sourceFilePath": "C:\\cloud_ru\\social-network-microservices\\apps\\message\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\repos\\evo-paas-services-social-network-webinars\\backend\\apps\\message\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -193,8 +197,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider        = \"prisma-client-js\"\n  output          = \"../../../libs/prisma-message/client\"\n  previewFeatures = [\"fullTextSearch\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MESSAGE_DATABASE_URL\")\n}\n\nmodel Message {\n  id          String    @id @default(uuid())\n  senderId    String    @map(\"sender_id\")\n  recipientId String    @map(\"recipient_id\")\n  content     String\n  isDeleted   Boolean   @default(false) @map(\"is_deleted\")\n  likesCount  Int       @default(0) @map(\"likes_count\")\n  readAt      DateTime? @map(\"read_at\")\n  createdAt   DateTime  @default(now()) @map(\"created_at\")\n  updatedAt   DateTime  @updatedAt @map(\"updated_at\")\n\n  likes MessageLike[]\n\n  @@index([senderId])\n  @@index([recipientId])\n  @@map(\"messages\")\n}\n\nmodel MessageLike {\n  id        String   @id @default(uuid())\n  messageId String   @map(\"message_id\")\n  userId    String   @map(\"user_id\")\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)\n\n  @@unique([messageId, userId])\n  @@index([messageId])\n  @@index([userId])\n  @@map(\"message_likes\")\n}\n",
-  "inlineSchemaHash": "01037d9c161babd9542eacd7561f3d55bbbb9b807df3f74b75b6b3128de6820f",
+  "inlineSchema": "generator client {\n  provider        = \"prisma-client-js\"\n  binaryTargets   = [\"native\", \"linux-musl-openssl-3.0.x\"]\n  output          = \"../../../libs/prisma-message/client\"\n  previewFeatures = [\"fullTextSearch\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"MESSAGE_DATABASE_URL\")\n}\n\nmodel Message {\n  id          String    @id @default(uuid())\n  senderId    String    @map(\"sender_id\")\n  recipientId String    @map(\"recipient_id\")\n  content     String\n  isDeleted   Boolean   @default(false) @map(\"is_deleted\")\n  likesCount  Int       @default(0) @map(\"likes_count\")\n  readAt      DateTime? @map(\"read_at\")\n  createdAt   DateTime  @default(now()) @map(\"created_at\")\n  updatedAt   DateTime  @updatedAt @map(\"updated_at\")\n\n  likes MessageLike[]\n\n  @@index([senderId])\n  @@index([recipientId])\n  @@map(\"messages\")\n}\n\nmodel MessageLike {\n  id        String   @id @default(uuid())\n  messageId String   @map(\"message_id\")\n  userId    String   @map(\"user_id\")\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)\n\n  @@unique([messageId, userId])\n  @@index([messageId])\n  @@index([userId])\n  @@map(\"message_likes\")\n}\n",
+  "inlineSchemaHash": "00db5e8ef007f7e37200b9d60d275c9b4829049f312bf663202bffcbce599b59",
   "copyEngine": true
 }
 
@@ -234,6 +238,10 @@ Object.assign(exports, Prisma)
 // file annotations for bundling tools to include these files
 path.join(__dirname, "query_engine-windows.dll.node");
 path.join(process.cwd(), "libs/prisma-message/client/query_engine-windows.dll.node")
+
+// file annotations for bundling tools to include these files
+path.join(__dirname, "libquery_engine-linux-musl-openssl-3.0.x.so.node");
+path.join(process.cwd(), "libs/prisma-message/client/libquery_engine-linux-musl-openssl-3.0.x.so.node")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "libs/prisma-message/client/schema.prisma")

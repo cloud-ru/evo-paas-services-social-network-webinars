@@ -134,7 +134,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\cloud_ru\\social-network-microservices\\libs\\prisma-user\\client",
+      "value": "C:\\repos\\evo-paas-services-social-network-webinars\\backend\\libs\\prisma-user\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -145,10 +145,14 @@ const config = {
         "fromEnvVar": null,
         "value": "windows",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "linux-musl-openssl-3.0.x"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\cloud_ru\\social-network-microservices\\apps\\user\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\repos\\evo-paas-services-social-network-webinars\\backend\\apps\\user\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -171,8 +175,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../../../libs/prisma-user/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"USER_DATABASE_URL\")\n}\n\nmodel UserProfile {\n  id             String    @id @default(uuid())\n  userId         String    @unique @map(\"user_id\")\n  email          String\n  firstName      String    @map(\"first_name\")\n  lastName       String    @map(\"last_name\")\n  avatarUrl      String?   @map(\"avatar_url\")\n  bio            String?\n  status         String    @default(\"offline\") // online, offline, away\n  lastActivityAt DateTime? @map(\"last_activity_at\")\n  createdAt      DateTime  @default(now()) @map(\"created_at\")\n  updatedAt      DateTime  @updatedAt @map(\"updated_at\")\n\n  @@index([firstName])\n  @@index([lastName])\n  @@index([email])\n  @@map(\"user_profiles\")\n}\n",
-  "inlineSchemaHash": "e4bec75586eb9c8f1d192476e2d44e3ec165cc5926671245f2748b89d3d4cf25",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  binaryTargets = [\"native\", \"linux-musl-openssl-3.0.x\"]\n  output        = \"../../../libs/prisma-user/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"USER_DATABASE_URL\")\n}\n\nmodel UserProfile {\n  id             String    @id @default(uuid())\n  userId         String    @unique @map(\"user_id\")\n  email          String\n  firstName      String    @map(\"first_name\")\n  lastName       String    @map(\"last_name\")\n  avatarUrl      String?   @map(\"avatar_url\")\n  bio            String?\n  status         String    @default(\"offline\") // online, offline, away\n  lastActivityAt DateTime? @map(\"last_activity_at\")\n  createdAt      DateTime  @default(now()) @map(\"created_at\")\n  updatedAt      DateTime  @updatedAt @map(\"updated_at\")\n\n  @@index([firstName])\n  @@index([lastName])\n  @@index([email])\n  @@map(\"user_profiles\")\n}\n",
+  "inlineSchemaHash": "d52f2b9f871505a7bd78776efbc47a243fca65ea5f7237b77dc700ed3035520c",
   "copyEngine": true
 }
 config.dirname = '/'

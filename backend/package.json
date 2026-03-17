@@ -16,6 +16,7 @@
     "prisma:generate:user": "prisma generate --schema apps/user/prisma/schema.prisma",
     "prisma:generate:message": "prisma generate --schema apps/message/prisma/schema.prisma",
     "prisma:generate:post": "prisma generate --schema apps/post/prisma/schema.prisma",
+    "prisma:generate:all": "yarn prisma:generate:auth && yarn prisma:generate:user && yarn prisma:generate:message && yarn prisma:generate:post",
     "create-migration:auth": "docker-compose -f docker-compose.migrate.yml up -d && sleep 5 && cross-env AUTH_DATABASE_URL=postgresql://postgres:password@localhost:5433/social_network?schema=auth npx prisma migrate dev --name init --schema apps/auth/prisma/schema.prisma --create-only && docker-compose -f docker-compose.migrate.yml down",
     "create-migration:user": "docker-compose -f docker-compose.migrate.yml up -d && sleep 5 && cross-env USER_DATABASE_URL=postgresql://postgres:password@localhost:5433/social_network?schema=user npx prisma migrate dev --name init --schema apps/user/prisma/schema.prisma --create-only && docker-compose -f docker-compose.migrate.yml down",
     "create-migration:message": "docker-compose -f docker-compose.migrate.yml up -d && sleep 5 && cross-env MESSAGE_DATABASE_URL=postgresql://postgres:password@localhost:5433/social_network?schema=message npx prisma migrate dev --name init --schema apps/message/prisma/schema.prisma --create-only && docker-compose -f docker-compose.migrate.yml down",
