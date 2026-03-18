@@ -61,8 +61,8 @@
     "deploy:all": "yarn deploy:api-gateway && yarn deploy:auth && yarn deploy:email && yarn deploy:user && yarn deploy:message && yarn deploy:post && yarn deploy:file"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.981.0",
-    "@aws-sdk/s3-request-presigner": "^3.981.0",
+    "@aws-sdk/client-s3": "^3.1011.0",
+    "@aws-sdk/s3-request-presigner": "^3.1011.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
