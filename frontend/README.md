@@ -95,7 +95,7 @@
 - `yarn docker:tag-base-run`: Тегирует образ base-run для реестра.
 - `yarn docker:push-base-run`: Отправляет образ base-run в реестр.
 - `yarn docker:deploy-base-run`: Деплоит образ base-run (сборка + тегирование + отправка).
-- `yarn docker:deploy-requirements`: Деплоит оба базовых образа.
+- `yarn deploy:base`: Деплоит оба базовых образа.
 
 ## Архитектура Docker
 
@@ -105,12 +105,12 @@
 
 Процесс сборки зависит от двух базовых образов:
 
-1. **base-build** (`registry_name.cr.cloud.ru/social-network-frontend/base-build:latest`)
+1. **base-build** (`registry_name.cr.cloud.ru/base/frontend-build:latest`)
    - Основан на `node:22-alpine`
    - Включает `libc6-compat` для совместимости
    - Используется для установки зависимостей и сборки приложения
 
-2. **base-run** (`registry_name.cr.cloud.ru/social-network-frontend/base-run:latest`)
+2. **base-run** (`registry_name.cr.cloud.ru/base/frontend-run:latest`)
    - Основан на `node:22-alpine`
    - Минимальный образ для выполнения
    - Используется для финального продакшен контейнера
@@ -181,7 +181,7 @@ yarn docker:deploy-base-build
 yarn docker:deploy-base-run
 
 # Деплой обоих базовых образов
-yarn docker:deploy-requirements
+yarn deploy:base
 ```
 
 Отдельные шаги для базовых образов:
@@ -231,7 +231,7 @@ docker run -p 3000:3000 social-network-frontend
 1. Сначала задеплойте базовые образы:
 
    ```bash
-   yarn docker:deploy-requirements
+   yarn deploy:base
    ```
 
 2. Затем соберите и задеплойте приложение:

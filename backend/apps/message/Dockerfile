@@ -1,5 +1,5 @@
 
-FROM registry_name.cr.cloud.ru/social-network-microservices/base-build:latest AS builder
+FROM registry_name.cr.cloud.ru/base/backend-build:latest AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN yarn install --frozen-lockfile
 RUN npx prisma generate --schema apps/message/prisma/schema.prisma
 RUN yarn build message
 
-FROM registry_name.cr.cloud.ru/social-network-microservices/base-run:latest
+FROM registry_name.cr.cloud.ru/base/backend-run:latest
 
 WORKDIR /app
 COPY --from=builder /app/dist/apps/message ./dist

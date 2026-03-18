@@ -177,7 +177,7 @@ yarn create-migration:post
 
 ```bash
 # Деплой базовых образов (требуется сначала)
-yarn docker:deploy-requirements
+yarn deploy:base
 
 # Деплой отдельных сервисов
 yarn deploy:api-gateway
@@ -227,7 +227,7 @@ http://localhost:3000/api
 
 ```bash
 # Деплой обоих базовых образов (build + run)
-yarn docker:deploy-requirements
+yarn deploy:base
 
 # Или деплой по отдельности:
 yarn docker:deploy:base:build   # Сборка, тегирование и отправка образа base-build
@@ -283,7 +283,7 @@ yarn deploy:all
 
    ```bash
    # 1. Сборка и отправка базовых образов
-   yarn docker:deploy-requirements
+   yarn deploy:base
 
    # 2. Деплой всех микросервисов
    yarn deploy:all
@@ -292,7 +292,7 @@ yarn deploy:all
 2. **Обновление Базовых Образов** (когда меняется версия Node.js):
 
    ```bash
-   yarn docker:deploy-requirements
+   yarn deploy:base
    # Затем пересборка всех сервисов, которые от них зависят
    yarn deploy:all
    ```

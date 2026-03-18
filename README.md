@@ -33,7 +33,7 @@
 **Деплой базовых образов (обязательно):**
 ```bash
 cd backend
-yarn docker:deploy-requirements
+yarn deploy:base
 ```
 
 Эта команда соберет и отправит базовые образы (`base-build` и `base-run`) в реестр `registry_name.cr.cloud.ru`.
