@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ArrowLeft, Loader2, MoreVertical, Search, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChatInput } from "./ChatInput";
 import { UserAvatar } from "@/components/users/UserAvatar";
@@ -49,9 +49,10 @@ export function ChatWindow({ partnerId }: ChatWindowProps) {
     },
   });
 
-  const messages = messagesData?.messages
-    ? [...messagesData.messages].reverse()
-    : [];
+  const messages = useMemo(
+    () => (messagesData?.messages ? [...messagesData.messages].reverse() : []),
+    [messagesData]
+  );
 
   useEffect(() => {
     if (scrollRef.current) {
