@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueries } from "@tanstack/react-query";
-import { messagesApi } from "@/app/api/messages";
+import { MESSAGES_REFETCH_INTERVAL, messagesApi } from "@/app/api/messages";
 import { usersApi } from "@/app/api/users";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -21,6 +21,7 @@ export function ReferenceChatList() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["messages", "conversations"],
     queryFn: () => messagesApi.getConversations(),
+    refetchInterval: MESSAGES_REFETCH_INTERVAL,
   });
 
   const conversations = data?.conversations ?? [];

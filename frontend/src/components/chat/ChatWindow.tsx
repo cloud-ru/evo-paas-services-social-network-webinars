@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { messagesApi } from "@/app/api/messages";
+import { MESSAGES_REFETCH_INTERVAL, messagesApi } from "@/app/api/messages";
 import { usersApi } from "@/app/api/users";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
@@ -36,7 +36,7 @@ export function ChatWindow({ partnerId }: ChatWindowProps) {
       searchQuery
         ? messagesApi.searchMessages(partnerId, searchQuery)
         : messagesApi.getMessages(partnerId),
-    refetchInterval: searchQuery ? false : 5000,
+    refetchInterval: MESSAGES_REFETCH_INTERVAL,
   });
 
   const sendMessageMutation = useMutation({

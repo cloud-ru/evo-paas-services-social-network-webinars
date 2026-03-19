@@ -9,6 +9,8 @@ import {
   MessageResponseDto,
 } from "@/types/api";
 
+export const MESSAGES_REFETCH_INTERVAL = 5000;
+
 export const messagesApi = {
   createMessage: async (data: CreateMessageDto) => {
     const response = await apiClient.post<MessageResponseDto>("/message", data);
