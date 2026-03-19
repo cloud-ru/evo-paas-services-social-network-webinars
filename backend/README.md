@@ -41,7 +41,7 @@ social-network-microservices/
 │   ├── message/            # Личные сообщения
 │   ├── post/               # Посты и лента
 │   ├── file/               # Хранение файлов
-│   └── base-images/        # Базовые образы Docker (build & run)
+├── base-images/            # Базовые образы Docker (build & run)
 ├── libs/                   # Общие библиотеки
 │   └── types/              # Общие контракты и типы
 ├── docker-compose.yml      # Локальная среда разработки
