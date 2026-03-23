@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: postgres
+spec:
+  storageClassName: cloudru-ssd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: minio
+spec:
+  storageClassName: cloudru-ssd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi

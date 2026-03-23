@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: email
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: email
+spec:
+  ports:
+    - port: 3002
+      targetPort: 3002
+      protocol: TCP
+      name: http
+  selector:
+    app: social-network-webinars
+    component: email
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: email
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: email
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: social-network-webinars
+      component: email
+  template:
+    metadata:
+      labels:
+        app: social-network-webinars
+        component: email
+    spec:
+      containers:
+        - name: email
+          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-email:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3002
+              name: http
+          env:
+            - name: EMAIL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: EMAIL_PORT
+            - name: EMAIL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: EMAIL_HOST
+            - name: EMAIL_DEV_MODE
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: EMAIL_DEV_MODE
+            - name: SMTP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: SMTP_HOST
+            - name: SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: SMTP_PORT
+            - name: SMTP_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: SMTP_USER
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: SMTP_PASSWORD
+            - name: SMTP_FROM
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: SMTP_FROM
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+              ephemeral-storage: "512Mi"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+              ephemeral-storage: "1Gi"
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3002
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3002
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5

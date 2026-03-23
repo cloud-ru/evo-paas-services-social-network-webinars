@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: file
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: file
+spec:
+  ports:
+    - port: 3006
+      targetPort: 3006
+      protocol: TCP
+      name: http
+  selector:
+    app: social-network-webinars
+    component: file
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: file
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: social-network-webinars
+      component: file
+  template:
+    metadata:
+      labels:
+        app: social-network-webinars
+        component: file
+    spec:
+      containers:
+        - name: file
+          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-file:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3006
+              name: http
+          env:
+            - name: FILE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: FILE_PORT
+            - name: FILE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: FILE_HOST
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: S3_ACCESS_KEY_ID
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: S3_SECRET_ACCESS_KEY
+            - name: S3_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: S3_REGION
+            - name: S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: S3_BUCKET
+            - name: S3_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: S3_ENDPOINT
+            - name: S3_PUBLIC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: S3_PUBLIC_URL
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3006
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3006
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5

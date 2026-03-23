@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: post
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: post
+spec:
+  ports:
+    - port: 3005
+      targetPort: 3005
+      protocol: TCP
+      name: http
+  selector:
+    app: social-network-webinars
+    component: post
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: post
+  namespace: social-network
+  labels:
+    app: social-network-webinars
+    component: post
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: social-network-webinars
+      component: post
+  template:
+    metadata:
+      labels:
+        app: social-network-webinars
+        component: post
+    spec:
+      containers:
+        - name: post
+          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-post:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3005
+              name: http
+          env:
+            - name: POST_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: POST_PORT
+            - name: POST_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: POST_HOST
+            - name: POST_DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: POST_DATABASE_URL
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: POSTGRES_DB
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3005
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3005
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 5

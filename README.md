@@ -28,7 +28,7 @@
 ### 1. Запуск Бэкенда
 
 **Предварительная настройка:**
-Замените `registry_name` на имя вашего репозитория в Artifact Registry во всех Dockerfile и скриптах деплоя.
+Замените `evo-social-network-sedg1l` на имя вашего репозитория в Artifact Registry во всех Dockerfile и скриптах деплоя.
 
 **Деплой базовых образов (обязательно):**
 ```bash
@@ -36,7 +36,7 @@ cd backend
 yarn deploy:base
 ```
 
-Эта команда соберет и отправит базовые образы (`base-build` и `base-run`) в реестр `registry_name.cr.cloud.ru`.
+Эта команда соберет и отправит базовые образы (`base-build` и `base-run`) в реестр `evo-social-network-sedg1l.cr.cloud.ru`.
 
 Перейдите в директорию `backend`, установите зависимости, настройте переменные окружения и запустите сервисы:
 
