@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, Get } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { FileService } from './file.service';
 import { UploadFileDto } from '@app/types';
@@ -8,6 +8,12 @@ export class FileController {
   private readonly logger = new Logger(FileController.name);
 
   constructor(private readonly fileService: FileService) {}
+
+  @Get('health')
+  healthCheckHttp() {
+    this.logger.log('Received HTTP health check request');
+    return { status: 'ok', service: 'file' };
+  }
 
   @MessagePattern('file.health')
   healthCheck() {

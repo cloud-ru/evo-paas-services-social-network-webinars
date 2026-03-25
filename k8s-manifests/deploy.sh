@@ -55,8 +55,8 @@ kubectl apply -f secret.yaml
 print_success "Configuration applied"
 
 # Apply storage
-print_status "Applying storage configuration..."
-kubectl apply -f pvc.yaml
+# print_status "Applying storage configuration..."
+# kubectl apply -f pvc.yaml
 print_success "Storage configuration applied"
 
 # Deploy infrastructure services

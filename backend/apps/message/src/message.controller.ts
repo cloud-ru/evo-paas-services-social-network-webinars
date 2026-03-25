@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, Get } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { MessageService } from './message.service';
 import {
@@ -19,6 +19,12 @@ export class MessageController {
   private readonly logger = new Logger(MessageController.name);
 
   constructor(private readonly messageService: MessageService) {}
+
+  @Get('health')
+  healthCheckHttp() {
+    this.logger.log('Received HTTP health check request');
+    return { status: 'ok', service: 'message' };
+  }
 
   @MessagePattern('message.health')
   healthCheck() {

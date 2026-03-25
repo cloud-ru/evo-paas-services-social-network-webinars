@@ -95,15 +95,15 @@ spec:
               memory: "256Mi"
               cpu: "200m"
               ephemeral-storage: "1Gi"
-          # livenessProbe:
-          #   httpGet:
-          #     path: /health
-          #     port: 3002
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 10
-          # readinessProbe:
-          #   httpGet:
-          #     path: /health
-          #     port: 3002
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3012
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3012
+            initialDelaySeconds: 5
+            periodSeconds: 5

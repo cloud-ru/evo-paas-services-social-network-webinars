@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, Get } from '@nestjs/common';
 import { MessagePattern, EventPattern } from '@nestjs/microservices';
 import type { UserRegisteredEvent, PasswordResetEvent } from '@app/types/auth';
 import { EmailService } from './email.service';
@@ -8,6 +8,12 @@ export class EmailController {
   private readonly logger = new Logger(EmailController.name);
 
   constructor(private readonly emailService: EmailService) {}
+
+  @Get('health')
+  healthCheckHttp() {
+    this.logger.log('Received HTTP health check request');
+    return { status: 'ok', service: 'email' };
+  }
 
   @MessagePattern('email.health')
   healthCheck() {

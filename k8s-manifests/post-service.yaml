@@ -93,15 +93,15 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "200m"
-          # livenessProbe:
-          #   httpGet:
-          #     path: /health
-          #     port: 3005
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 10
-          # readinessProbe:
-          #   httpGet:
-          #     path: /health
-          #     port: 3005
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3015
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3015
+            initialDelaySeconds: 5
+            periodSeconds: 5

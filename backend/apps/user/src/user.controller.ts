@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, Get } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { UserService } from './user.service';
 import {
@@ -18,6 +18,12 @@ export class UserController {
   private readonly logger = new Logger(UserController.name);
 
   constructor(private readonly userService: UserService) {}
+
+  @Get('health')
+  healthCheckHttp() {
+    this.logger.log('Received HTTP health check request');
+    return { status: 'ok', service: 'user' };
+  }
 
   @MessagePattern('create_user_profile')
   async createUserProfile(@Payload() dto: CreateUserProfileDto) {

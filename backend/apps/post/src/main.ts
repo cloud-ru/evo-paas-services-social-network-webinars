@@ -18,7 +18,13 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
-  await app.init();
+  
+  // Start HTTP server for health endpoint
+  const httpPort = Number.parseInt(process.env.HTTP_PORT || '3015', 10);
+  await app.listen(httpPort);
+  
   logger.log(`Post Service microservice listening on TCP port ${tcpPort}`);
+  logger.log(`Post Service HTTP server listening on port ${httpPort}`);
+  logger.log(`Health check available at http://localhost:${httpPort}/health`);
 }
 void bootstrap();
