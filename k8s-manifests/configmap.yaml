@@ -14,7 +14,6 @@ data:
   # Service Ports
   AUTH_PORT: "3001"
   AUTH_HOST: "auth"
-  AUTH_DATABASE_URL: "postgresql://postgres:password@postgres:5432/social_network?schema=auth"
   
   EMAIL_PORT: "3002"
   EMAIL_HOST: "email"
@@ -22,15 +21,12 @@ data:
   
   USER_PORT: "3003"
   USER_HOST: "user"
-  USER_DATABASE_URL: "postgresql://postgres:password@postgres:5432/social_network?schema=user"
   
   MESSAGE_PORT: "3004"
   MESSAGE_HOST: "message"
-  MESSAGE_DATABASE_URL: "postgresql://postgres:password@postgres:5432/social_network?schema=message"
   
   POST_PORT: "3005"
   POST_HOST: "post"
-  POST_DATABASE_URL: "postgresql://postgres:password@postgres:5432/social_network?schema=post"
   
   FILE_PORT: "3006"
   FILE_HOST: "file"

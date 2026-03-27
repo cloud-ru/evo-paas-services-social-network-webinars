@@ -48,6 +48,18 @@ print_status "Creating namespace..."
 kubectl apply -f namespace.yaml
 print_success "Namespace created"
 
+# Check and generate secrets if needed
+if [ ! -f "secret.yaml" ]; then
+    if [ ! -f ".env.secrets" ]; then
+        print_warning ".env.secrets file not found!"
+        print_status "Please copy .env.secrets.template to .env.secrets and fill in your values"
+        print_status "Using default secret.yaml with placeholder values..."
+    else
+        print_status "Generating secret.yaml from .env.secrets..."
+        ./generate-secrets.sh
+    fi
+fi
+
 # Apply configuration
 print_status "Applying configuration..."
 kubectl apply -f configmap.yaml

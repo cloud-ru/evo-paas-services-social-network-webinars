@@ -58,8 +58,8 @@ spec:
                   key: MESSAGE_HOST
             - name: MESSAGE_DATABASE_URL
               valueFrom:
-                configMapKeyRef:
-                  name: social-network-config
+                secretKeyRef:
+                  name: social-network-secrets
                   key: MESSAGE_DATABASE_URL
             - name: POSTGRES_USER
               valueFrom:
@@ -86,6 +86,11 @@ spec:
                 configMapKeyRef:
                   name: social-network-config
                   key: POSTGRES_DB
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: JWT_SECRET
           resources:
             requests:
               memory: "128Mi"

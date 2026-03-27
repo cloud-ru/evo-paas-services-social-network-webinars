@@ -86,6 +86,11 @@ spec:
                 configMapKeyRef:
                   name: social-network-config
                   key: S3_PUBLIC_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: JWT_SECRET
           resources:
             requests:
               memory: "128Mi"

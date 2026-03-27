@@ -1,0 +1,8 @@
+# Environment files with secrets
+.env.secrets
+
+# Generated files
+secret.yaml
+
+# Keep the template
+!.env.secrets.template

@@ -46,6 +46,11 @@ spec:
             - containerPort: 3001
               name: http
           env:
+            - name: AUTH_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: AUTH_DATABASE_URL
             - name: AUTH_PORT
               valueFrom:
                 configMapKeyRef:
@@ -56,11 +61,6 @@ spec:
                 configMapKeyRef:
                   name: social-network-config
                   key: AUTH_HOST
-            - name: AUTH_DATABASE_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: social-network-config
-                  key: AUTH_DATABASE_URL
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
