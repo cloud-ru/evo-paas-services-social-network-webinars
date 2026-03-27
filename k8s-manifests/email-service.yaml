@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: email
-          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-email:latest
+          image: registry_name.cr.cloud.ru/social-network-email:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3002

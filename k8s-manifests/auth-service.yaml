@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: auth
-          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-auth:latest
+          image: registry_name.cr.cloud.ru/social-network-auth:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3001

@@ -1,12 +1,12 @@
 # Install dependencies only when needed
-FROM evo-social-network-sedg1l.cr.cloud.ru/base/frontend-build:latest AS deps
+FROM registry_name.cr.cloud.ru/base/frontend-build:latest AS deps
 WORKDIR /app
 
 COPY package.json yarn.lock ./
 RUN yarn --frozen-lockfile
 
 # Rebuild the source code only when needed
-FROM evo-social-network-sedg1l.cr.cloud.ru/base/frontend-build:latest AS builder
+FROM registry_name.cr.cloud.ru/base/frontend-build:latest AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -17,7 +17,7 @@ COPY .env.k8s .env.production
 RUN BUILD_STANDALONE=true yarn run build
 
 # Production image, copy all the files and run next
-FROM evo-social-network-sedg1l.cr.cloud.ru/base/frontend-run:latest AS runner
+FROM registry_name.cr.cloud.ru/base/frontend-run:latest AS runner
 WORKDIR /app
 
 ENV NODE_ENV production

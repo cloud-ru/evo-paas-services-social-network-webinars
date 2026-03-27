@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: file
-          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-file:latest
+          image: registry_name.cr.cloud.ru/social-network-file:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3006

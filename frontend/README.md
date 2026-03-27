@@ -99,18 +99,18 @@
 
 ## Архитектура Docker
 
-Приложение использует **многоэтапную сборку Docker** с пользовательскими базовыми образами, хранящимися в частном реестре (`evo-social-network-sedg1l.cr.cloud.ru`). Эта архитектура оптимизирует время сборки и уменьшает размер образа.
+Приложение использует **многоэтапную сборку Docker** с пользовательскими базовыми образами, хранящимися в частном реестре (`registry_name.cr.cloud.ru`). Эта архитектура оптимизирует время сборки и уменьшает размер образа.
 
 ### Базовые образы
 
 Процесс сборки зависит от двух базовых образов:
 
-1. **base-build** (`evo-social-network-sedg1l.cr.cloud.ru/base/frontend-build:latest`)
+1. **base-build** (`registry_name.cr.cloud.ru/base/frontend-build:latest`)
    - Основан на `node:22-alpine`
    - Включает `libc6-compat` для совместимости
    - Используется для установки зависимостей и сборки приложения
 
-2. **base-run** (`evo-social-network-sedg1l.cr.cloud.ru/base/frontend-run:latest`)
+2. **base-run** (`registry_name.cr.cloud.ru/base/frontend-run:latest`)
    - Основан на `node:22-alpine`
    - Минимальный образ для выполнения
    - Используется для финального продакшен контейнера
@@ -161,7 +161,7 @@
 
 #### Предварительный этап
 
-Замените `evo-social-network-sedg1l` на имя вашего репозитория в Artifact Registry.
+Замените `registry_name` на имя вашего репозитория в Artifact Registry.
 
 Основной `Dockerfile` использует трехэтапный процесс сборки:
 
@@ -206,7 +206,7 @@ yarn deploy
 
 # Отдельные шаги
 yarn docker:build   # Сборка образа приложения
-yarn docker:tag     # Тегирование как evo-social-network-sedg1l.cr.cloud.ru/social-network-frontend:latest
+yarn docker:tag     # Тегирование как registry_name.cr.cloud.ru/social-network-frontend:latest
 yarn docker:push    # Отправка в реестр
 ```
 
@@ -215,7 +215,7 @@ yarn docker:push    # Отправка в реестр
 Чтобы запустить контейнер локально:
 
 ```bash
-docker run -p 3000:3000 evo-social-network-sedg1l.cr.cloud.ru/social-network-frontend:latest
+docker run -p 3000:3000 registry_name.cr.cloud.ru/social-network-frontend:latest
 ```
 
 Или используя локальный тег:

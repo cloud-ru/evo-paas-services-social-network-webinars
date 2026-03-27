@@ -56,7 +56,7 @@ social-network-microservices/
 - Docker & Docker Compose
 - PostgreSQL (если запускаете локально без Docker)
 - MinIO (если запускаете локально без Docker)
-- Доступ к частному Docker реестру (для деплоя): `evo-social-network-sedg1l.cr.cloud.ru` (замените `evo-social-network-sedg1l` на имя вашего репозитория в Artifact Registry)
+- Доступ к частному Docker реестру (для деплоя): `registry_name.cr.cloud.ru` (замените `registry_name` на имя вашего репозитория в Artifact Registry)
 
 ## Начало работы
 
@@ -204,11 +204,11 @@ http://localhost:3000/api
 
 ### Предварительный этап
 
-Замените `evo-social-network-sedg1l` на имя вашего репозитория в Artifact Registry.
+Замените `registry_name` на имя вашего репозитория в Artifact Registry.
 
 ### Архитектура
 
-Проект использует архитектуру **многоэтапной сборки Docker** с пользовательскими базовыми образами, хранящимися в частном реестре (`evo-social-network-sedg1l.cr.cloud.ru`):
+Проект использует архитектуру **многоэтапной сборки Docker** с пользовательскими базовыми образами, хранящимися в частном реестре (`registry_name.cr.cloud.ru`):
 
 1. **Базовые Образы** (хранятся в `apps/base-images/`):
    - `base-build`: Node.js 22 Alpine образ для сборки приложений
@@ -265,7 +265,7 @@ yarn deploy:file
 
 1. **Build**: Создает Docker образ из Dockerfile
 2. **Tag**: Тегирует образ для частного реестра
-3. **Push**: Отправляет образ в `evo-social-network-sedg1l.cr.cloud.ru`
+3. **Push**: Отправляет образ в `registry_name.cr.cloud.ru`
 
 #### 3. Деплой Всех Сервисов
 

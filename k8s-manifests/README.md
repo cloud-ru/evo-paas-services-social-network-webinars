@@ -23,7 +23,7 @@ The application consists of the following microservices:
 2. **kubectl**: Configured to connect to your cluster
 3. **Ingress Controller**: NGINX Ingress Controller installed
 4. **Storage Class**: A default storage class (named "standard" in manifests)
-5. **Container Registry**: Access to `evo-social-network-sedg1l.cr.cloud.ru` registry
+5. **Container Registry**: Access to `registry_name.cr.cloud.ru` registry
 
 ## Quick Start
 

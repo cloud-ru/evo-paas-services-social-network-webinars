@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-frontend:latest
+          image: registry_name.cr.cloud.ru/social-network-frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

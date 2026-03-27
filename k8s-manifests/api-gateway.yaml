@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-api-gateway:latest
+          image: registry_name.cr.cloud.ru/social-network-api-gateway:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
