@@ -12,7 +12,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Copy the k8s environment file for build-time configuration
-COPY .env.k8s .env.production
+COPY .env .env.production
 
 RUN BUILD_STANDALONE=true yarn run build
 
