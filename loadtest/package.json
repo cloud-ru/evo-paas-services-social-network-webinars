@@ -5,7 +5,7 @@
   "main": "scripts/social-network-journey.js",
   "scripts": {
     "test": "k6 run scripts/social-network-journey.js",
-    "test:50k": "k6 run scripts/social-network-journey.js --vus 50000 --duration 10m"
+    "test:5k": "k6 run scripts/social-network-journey.js --vus 5000 --duration 10m"
   },
   "devDependencies": {
     "@types/k6": "^0.54.0"
