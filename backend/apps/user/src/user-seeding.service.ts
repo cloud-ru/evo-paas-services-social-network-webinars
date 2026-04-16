@@ -14,7 +14,7 @@ export class UserSeedingService implements OnModuleInit {
   }
 
   private async seedUsers() {
-    const userCount = await this.prisma.userProfile.count();
+    const userCount = await this.prisma.client.userProfile.count();
     if (userCount > 100) {
       this.logger.log('Users already seeded, skipping...');
       return;
@@ -141,7 +141,7 @@ export class UserSeedingService implements OnModuleInit {
     }
 
     try {
-      await this.prisma.userProfile.createMany({
+      await this.prisma.client.userProfile.createMany({
         data: usersToCreate,
         skipDuplicates: true,
       });

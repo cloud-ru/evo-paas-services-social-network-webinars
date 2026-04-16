@@ -2429,13 +2429,13 @@ declare interface PrismaPromise_2<A> extends Promise<A> {
      * @param onrejected same as regular promises
      * @param transaction transaction options
      */
-    catch<R = never>(onrejected?: ((reason: any) => R | PromiseLike<R>) | undefined | null, transaction?: PrismaPromiseTransaction): Promise<A | R>;
+    catch<R = never>(onrejected?: ((reason: any) => R | PromiseLike<R>)   | null, transaction?: PrismaPromiseTransaction): Promise<A | R>;
     /**
      * Extension of the original `.finally` function
      * @param onfinally same as regular promises
      * @param transaction transaction options
      */
-    finally(onfinally?: (() => void) | undefined | null, transaction?: PrismaPromiseTransaction): Promise<A>;
+    finally(onfinally?: (() => void)   | null, transaction?: PrismaPromiseTransaction): Promise<A>;
     /**
      * Called when executing a batch of regular tx
      * @param transaction transaction options for batch tx
@@ -2563,7 +2563,7 @@ declare type QueryEngineLogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error'
 
 declare type QueryEngineRequest = {
     query: string;
-    variables: Object;
+    variables: object;
 };
 
 declare type QueryEngineResult<T> = {
@@ -2572,7 +2572,7 @@ declare type QueryEngineResult<T> = {
 };
 
 declare type QueryEngineTelemetry = {
-    enabled: Boolean;
+    enabled: boolean;
     endpoint: string;
 };
 

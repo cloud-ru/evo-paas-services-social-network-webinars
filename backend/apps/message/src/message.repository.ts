@@ -10,7 +10,7 @@ export class MessageRepository {
 
   async create(data: Prisma.MessageCreateInput) {
     this.logger.log(`Saving message to database: ${JSON.stringify(data)}`);
-    return this.prisma.message.create({
+    return await this.prisma.client.message.create({
       data,
     });
   }
@@ -32,7 +32,7 @@ export class MessageRepository {
     };
 
     const [messages, total] = await Promise.all([
-      this.prisma.message.findMany({
+      this.prisma.client.message.findMany({
         where: whereCondition,
         orderBy: { createdAt: 'desc' },
         take: limit,
@@ -44,21 +44,21 @@ export class MessageRepository {
           },
         },
       }),
-      this.prisma.message.count({ where: whereCondition }),
+      this.prisma.client.message.count({ where: whereCondition }),
     ]);
 
     return { messages, total };
   }
   async findById(id: string) {
     this.logger.log(`Finding message by id: ${id}`);
-    return this.prisma.message.findUnique({
+    return await this.prisma.client.message.findUnique({
       where: { id },
     });
   }
 
   async softDelete(id: string) {
     this.logger.log(`Soft deleting message: ${id}`);
-    return this.prisma.message.update({
+    return await this.prisma.client.message.update({
       where: { id },
       data: { isDeleted: true },
     });
@@ -87,7 +87,7 @@ export class MessageRepository {
     };
 
     const [messages, total] = await Promise.all([
-      this.prisma.message.findMany({
+      this.prisma.client.message.findMany({
         where: whereCondition,
         orderBy: { createdAt: 'desc' },
         take: limit,
@@ -99,7 +99,7 @@ export class MessageRepository {
           },
         },
       }),
-      this.prisma.message.count({ where: whereCondition }),
+      this.prisma.client.message.count({ where: whereCondition }),
     ]);
 
     return { messages, total };
@@ -111,7 +111,7 @@ export class MessageRepository {
     );
 
     // Get distinct conversation partners with their last message
-    const conversations = await this.prisma.$queryRaw<
+    const conversations = await this.prisma.client.$queryRaw<
       Array<{
         partner_id: string;
         last_message_id: string;
@@ -171,7 +171,9 @@ export class MessageRepository {
     `;
 
     // Get total count of conversations
-    const totalResult = await this.prisma.$queryRaw<Array<{ count: bigint }>>`
+    const totalResult = await this.prisma.client.$queryRaw<
+      Array<{ count: bigint }>
+    >`
       SELECT COUNT(DISTINCT CASE
         WHEN sender_id = ${userId} THEN recipient_id
         ELSE sender_id
@@ -203,7 +205,7 @@ export class MessageRepository {
    */
   async countUnread(userId: string): Promise<number> {
     this.logger.log(`Counting unread messages for user ${userId}`);
-    const count = await this.prisma.message.count({
+    const count = await this.prisma.client.message.count({
       where: {
         recipientId: userId,
         readAt: null,
