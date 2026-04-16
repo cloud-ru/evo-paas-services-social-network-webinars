@@ -9,7 +9,6 @@ export const options = configOptions;
 
 const apiClient = new ApiClient(BASE_URL);
 
-// --- Helper Functions ---
 function randomString(length) {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -17,6 +16,10 @@ function randomString(length) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
+}
+
+function isSuccess(r) {
+  return r.status === 200 || r.status === 201;
 }
 
 export default function () {
@@ -32,13 +35,13 @@ export default function () {
     `First_${uniqueId}`,
     "Lastname",
   );
-  check(regRes, { "registration successful": (r) => r.status === 201 });
+  check(regRes, { "registration successful": isSuccess });
 
   // Wait several seconds before going from write to read operation
   sleep(3);
 
   const loginRes = apiClient.login(email, password);
-  if (!check(loginRes, { "login successful": (r) => r.status === 200 })) {
+  if (!check(loginRes, { "login successful": isSuccess })) {
     return; // Stop if login fails
   }
 
@@ -55,7 +58,7 @@ export default function () {
     if (rand < 0.5) {
       // --- Feed & Browsing Flow (50%) ---
       const postsRes = apiClient.getPosts(token);
-      check(postsRes, { "got feed": (r) => r.status === 200 });
+      check(postsRes, { "got feed": isSuccess });
 
       // Pick a random user to view profile (if found in feed)
       try {
@@ -66,7 +69,7 @@ export default function () {
             token,
             randomPost.authorId,
           );
-          check(profileRes, { "got author profile": (r) => r.status === 200 });
+          check(profileRes, { "got author profile": isSuccess });
         }
       } catch (e) {}
     } else if (rand < 0.75) {
@@ -77,7 +80,7 @@ export default function () {
           token,
           `Hello world from ${uniqueId}! This is a load test.`,
         );
-        check(createRes, { "post created": (r) => r.status === 201 });
+        check(createRes, { "post created": isSuccess });
         sleep(3); // Wait after write
       } else {
         // Get feed first to find a post to like
@@ -88,7 +91,7 @@ export default function () {
             const randomPost = posts[Math.floor(Math.random() * posts.length)];
             const likeRes = apiClient.likePost(token, randomPost.id);
             check(likeRes, {
-              "post liked": (r) => r.status === 201 || r.status === 200,
+              "post liked": isSuccess,
             });
             sleep(3); // Wait after write
           }
@@ -110,7 +113,7 @@ export default function () {
               randomPost.authorId,
               `DMed you from ${uniqueId}!`,
             );
-            check(msgRes, { "message sent": (r) => r.status === 201 });
+            check(msgRes, { "message sent": isSuccess });
             sleep(3); // Wait after write
           }
         }
@@ -118,7 +121,7 @@ export default function () {
     } else {
       // --- Other / Search flow (10%) ---
       const searchRes = apiClient.searchUsers(token, "user");
-      check(searchRes, { "search results ok": (r) => r.status === 200 });
+      check(searchRes, { "search results ok": isSuccess });
     }
 
     // Think time between actions (1-3 seconds)
