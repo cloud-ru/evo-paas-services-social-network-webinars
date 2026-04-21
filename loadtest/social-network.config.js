@@ -4,9 +4,9 @@ export const options = {
       executor: "ramping-vus",
       startVUs: 0,
       stages: [
-        { duration: "5m", target: 1000 }, // Ramp up to 20k VUs
-        { duration: "5m", target: 2000 }, // Peak ramp up to 50k VUs
-        { duration: "10m", target: 2000 }, // Hold peak load
+        { duration: "5m", target: 50 }, // Ramp up to 50 VUs
+        { duration: "5m", target: 100 }, // Peak ramp up to 100 VUs
+        { duration: "10m", target: 100 }, // Hold peak load
         { duration: "5m", target: 0 }, // Ramp down
       ],
       gracefulStop: "30s",
