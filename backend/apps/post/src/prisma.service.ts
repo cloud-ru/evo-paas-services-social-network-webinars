@@ -5,7 +5,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { execSync } from 'node:child_process';
 import { PrismaClient } from '@app/prisma-post';
 import { createExtendedClient } from './prisma.extension';
 
@@ -32,20 +31,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    try {
-      this.logger.log('Running Prisma migrations...');
-      execSync(
-        'npx prisma migrate deploy --schema apps/post/prisma/schema.prisma',
-        {
-          stdio: 'inherit',
-        },
-      );
-      this.logger.log('Migrations completed successfully');
-    } catch (error) {
-      this.logger.error('Migration failed', error);
-      throw error;
-    }
-
     // Connect to the primary and all replicas
     await this.client.$connect();
   }
