@@ -32,7 +32,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    // Connect to the primary and all replicas
     await this.client.$connect();
   }
 

@@ -31,9 +31,6 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    // Connect to the primary and all replicas
-    // We cast to PrismaClient only for $connect to satisfy the linter
-    // without erasing the extended client's specific model types
     const baseClient = this.client as unknown as PrismaClient;
     await baseClient.$connect();
   }
