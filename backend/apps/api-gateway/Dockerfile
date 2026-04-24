@@ -1,4 +1,4 @@
-FROM registry-name.cr.cloud.ru/base/backend-build:latest AS builder
+FROM registry_name.cr.cloud.ru/base/backend-build:latest AS builder
 
 WORKDIR /app
 
@@ -11,7 +11,7 @@ COPY . .
 RUN yarn install --frozen-lockfile
 RUN yarn build api-gateway
 
-FROM registry-name.cr.cloud.ru/base/backend-run:latest
+FROM registry_name.cr.cloud.ru/base/backend-run:latest
 
 WORKDIR /app
 COPY --from=builder /app/dist/apps/api-gateway ./dist

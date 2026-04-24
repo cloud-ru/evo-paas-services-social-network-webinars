@@ -1,4 +1,4 @@
-FROM registry-name.cr.cloud.ru/base/backend-build:latest AS builder
+FROM registry_name.cr.cloud.ru/base/backend-build:latest AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ RUN npx prisma generate --schema apps/user/prisma/schema.prisma
 RUN npx prisma generate --schema apps/message/prisma/schema.prisma
 RUN npx prisma generate --schema apps/post/prisma/schema.prisma
 
-FROM registry-name.cr.cloud.ru/base/backend-run:latest
+FROM registry_name.cr.cloud.ru/base/backend-run:latest
 
 WORKDIR /app
 
