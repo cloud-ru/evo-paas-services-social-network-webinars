@@ -12,7 +12,7 @@ export class MessageLikeRepository {
    */
   async findLike(messageId: string, userId: string) {
     this.logger.log(`Finding like for message ${messageId} by user ${userId}`);
-    return this.prisma.messageLike.findUnique({
+    return await this.prisma.client.messageLike.findUnique({
       where: {
         messageId_userId: {
           messageId,
@@ -27,7 +27,7 @@ export class MessageLikeRepository {
    */
   async createLike(messageId: string, userId: string) {
     this.logger.log(`Creating like for message ${messageId} by user ${userId}`);
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.client.$transaction(async (tx) => {
       await tx.messageLike.create({
         data: {
           messageId,
@@ -47,7 +47,7 @@ export class MessageLikeRepository {
    */
   async deleteLike(messageId: string, userId: string) {
     this.logger.log(`Deleting like for message ${messageId} by user ${userId}`);
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.client.$transaction(async (tx) => {
       await tx.messageLike.delete({
         where: {
           messageId_userId: {
@@ -69,7 +69,7 @@ export class MessageLikeRepository {
    */
   async getLikesCount(messageId: string): Promise<number> {
     this.logger.log(`Getting likes count for message ${messageId}`);
-    const message = await this.prisma.message.findUnique({
+    const message = await this.prisma.client.message.findUnique({
       where: { id: messageId },
       select: { likesCount: true },
     });

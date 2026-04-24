@@ -7,8 +7,14 @@ import { RateLimitService } from './rate-limit.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JwtModule } from '@nestjs/jwt';
 
+import { ConfigModule, ConfigService } from '@nestjs/config';
+
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.local', '.env'],
+    }),
     ClientsModule.register([
       {
         name: 'EMAIL_SERVICE',
@@ -28,8 +34,10 @@ import { JwtModule } from '@nestjs/jwt';
       },
     ]),
     JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: process.env.JWT_SECRET || 'supersecret',
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET') || 'supersecret',
       }),
     }),
   ],

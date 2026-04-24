@@ -4,35 +4,37 @@ import {
   OnModuleDestroy,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@app/prisma-post';
-import { execSync } from 'node:child_process';
+import { createExtendedClient } from './prisma.extension';
 
 @Injectable()
-export class PrismaService
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
+  public readonly client: PrismaClient;
 
-  async onModuleInit() {
-    try {
-      this.logger.log('Running Prisma migrations...');
-      execSync(
-        'npx prisma migrate deploy --schema apps/post/prisma/schema.prisma',
-        {
-          stdio: 'inherit',
-        },
-      );
-      this.logger.log('Migrations completed successfully');
-    } catch (error) {
-      this.logger.error('Migration failed', error);
-      throw error;
-    }
+  constructor(private readonly configService: ConfigService) {
+    const primaryUrl =
+      this.configService.getOrThrow<string>('POST_DATABASE_URL');
+    const replicaUrlsStr = this.configService.get<string>(
+      'POST_DATABASE_REPLICA_URLS',
+      '',
+    );
+    const replicaUrls = replicaUrlsStr
+      ? replicaUrlsStr.split(',').map((url) => url.trim())
+      : [];
 
-    await this.$connect();
+    this.client = createExtendedClient(
+      primaryUrl,
+      replicaUrls,
+    ) as unknown as PrismaClient;
   }
 
-  async onModuleDestroy() {
-    await this.$disconnect();
+  async onModuleInit(): Promise<void> {
+    await this.client.$connect();
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.client.$disconnect();
   }
 }

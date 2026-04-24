@@ -10,21 +10,21 @@ export class UserRepository {
 
   async create(data: Prisma.UserProfileCreateInput) {
     this.logger.log(`Saving user profile to database: ${data.userId}`);
-    return this.prisma.userProfile.create({
+    return await this.prisma.client.userProfile.create({
       data,
     });
   }
 
   async findByUserId(userId: string) {
     this.logger.log(`Finding user profile by userId: ${userId}`);
-    return this.prisma.userProfile.findUnique({
+    return await this.prisma.client.userProfile.findUnique({
       where: { userId },
     });
   }
 
   async update(userId: string, data: Prisma.UserProfileUpdateInput) {
     this.logger.log(`Updating user profile for user: ${userId}`);
-    return this.prisma.userProfile.update({
+    return await this.prisma.client.userProfile.update({
       where: { userId },
       data,
     });
@@ -35,7 +35,7 @@ export class UserRepository {
       `Finding online users with limit ${limit}, offset ${offset}, since ${minLastActivity.toISOString()}`,
     );
 
-    return this.prisma.userProfile.findMany({
+    return await this.prisma.client.userProfile.findMany({
       where: {
         status: 'online',
         lastActivityAt: {
@@ -54,7 +54,7 @@ export class UserRepository {
     this.logger.log(
       `Counting online users since ${minLastActivity.toISOString()}`,
     );
-    return this.prisma.userProfile.count({
+    return await this.prisma.client.userProfile.count({
       where: {
         status: 'online',
         lastActivityAt: {
@@ -66,7 +66,7 @@ export class UserRepository {
 
   async findManyByIds(userIds: string[]) {
     this.logger.log(`Finding ${userIds.length} user profiles`);
-    return this.prisma.userProfile.findMany({
+    return await this.prisma.client.userProfile.findMany({
       where: {
         userId: {
           in: userIds,
@@ -77,7 +77,7 @@ export class UserRepository {
 
   async search(query: string, limit: number, offset: number) {
     this.logger.log(`Searching users with query: ${query}`);
-    return this.prisma.userProfile.findMany({
+    return await this.prisma.client.userProfile.findMany({
       where: {
         OR: [
           { firstName: { contains: query, mode: 'insensitive' } },
@@ -95,7 +95,7 @@ export class UserRepository {
   }
 
   async countSearch(query: string) {
-    return this.prisma.userProfile.count({
+    return await this.prisma.client.userProfile.count({
       where: {
         OR: [
           { firstName: { contains: query, mode: 'insensitive' } },

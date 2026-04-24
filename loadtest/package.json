@@ -1,0 +1,13 @@
+{
+  "name": "backend-loadtest",
+  "version": "1.0.0",
+  "description": "k6 load testing suite for social network backend",
+  "main": "scripts/social-network-journey.js",
+  "scripts": {
+    "test": "k6 run scripts/social-network-journey.js",
+    "test:small": "k6 run scripts/social-network-journey.js --vus 10 --duration 1m"
+  },
+  "devDependencies": {
+    "@types/k6": "^0.54.0"
+  }
+}
