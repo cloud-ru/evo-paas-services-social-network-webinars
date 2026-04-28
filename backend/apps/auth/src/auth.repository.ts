@@ -10,7 +10,7 @@ export class AuthRepository {
 
   async findUserByEmail(email: string) {
     this.logger.log(`Finding user by email: ${email}`);
-    return this.prisma.user.findUnique({
+    return await this.prisma.client.user.findUnique({
       where: { email },
     });
   }
@@ -21,7 +21,7 @@ export class AuthRepository {
     verificationExpiresAt: Date,
   ) {
     this.logger.log(`Creating user with verification: ${userData.email}`);
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.client.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: userData,
       });
@@ -40,7 +40,7 @@ export class AuthRepository {
 
   async findVerificationByToken(token: string) {
     this.logger.log(`Finding verification by token`);
-    return this.prisma.emailVerification.findUnique({
+    return await this.prisma.client.emailVerification.findUnique({
       where: { token },
       include: { user: true },
     });
@@ -48,7 +48,7 @@ export class AuthRepository {
 
   async verifyUserEmail(userId: string, verificationId: string) {
     this.logger.log(`Verifying email for user: ${userId}`);
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.client.$transaction(async (tx) => {
       // Update user email_verified flag
       await tx.user.update({
         where: { id: userId },
@@ -78,7 +78,7 @@ export class AuthRepository {
     tokenData: Omit<Prisma.TokenUncheckedCreateInput, 'sessionId'>,
   ) {
     this.logger.log(`Creating session for user: ${sessionData.userId}`);
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.client.$transaction(async (tx) => {
       const session = await tx.session.create({
         data: sessionData,
       });
@@ -95,7 +95,7 @@ export class AuthRepository {
 
   async findTokenByRefreshToken(refreshToken: string) {
     this.logger.log(`Finding token by refresh token`);
-    return this.prisma.token.findUnique({
+    return await this.prisma.client.token.findUnique({
       where: { refreshToken },
       include: { user: true },
     });
@@ -103,7 +103,7 @@ export class AuthRepository {
 
   async updateToken(id: string, data: Prisma.TokenUpdateInput) {
     this.logger.log(`Updating token: ${id}`);
-    return this.prisma.token.update({
+    return await this.prisma.client.token.update({
       where: { id },
       data,
     });
@@ -111,14 +111,14 @@ export class AuthRepository {
 
   async findTokenByAccessToken(accessToken: string) {
     this.logger.log(`Finding token by access token`);
-    return this.prisma.token.findFirst({
+    return await this.prisma.client.token.findFirst({
       where: { accessToken },
     });
   }
 
   async revokeToken(id: string) {
     this.logger.log(`Revoking token: ${id}`);
-    return this.prisma.token.update({
+    return await this.prisma.client.token.update({
       where: { id },
       data: {
         revokedAt: new Date(),
@@ -128,14 +128,14 @@ export class AuthRepository {
 
   async createPasswordReset(data: Prisma.PasswordResetUncheckedCreateInput) {
     this.logger.log(`Creating password reset for user`);
-    return this.prisma.passwordReset.create({
+    return await this.prisma.client.passwordReset.create({
       data,
     });
   }
 
   async findPasswordResetByToken(token: string) {
     this.logger.log(`Finding password reset by token`);
-    return this.prisma.passwordReset.findUnique({
+    return await this.prisma.client.passwordReset.findUnique({
       where: { token },
       include: { user: true },
     });
@@ -147,7 +147,7 @@ export class AuthRepository {
     newPasswordHash: string,
   ) {
     this.logger.log(`Resetting password for user: ${userId}`);
-    return this.prisma.$transaction(async (tx) => {
+    return await this.prisma.client.$transaction(async (tx) => {
       // Update user password
       await tx.user.update({
         where: { id: userId },
@@ -179,7 +179,7 @@ export class AuthRepository {
 
   async findSessionsByUserId(userId: string) {
     this.logger.log(`Finding sessions for user: ${userId}`);
-    return this.prisma.session.findMany({
+    return await this.prisma.client.session.findMany({
       where: { userId },
       include: {
         tokens: {
@@ -196,14 +196,14 @@ export class AuthRepository {
 
   async findSessionById(id: string) {
     this.logger.log(`Finding session by id: ${id}`);
-    return this.prisma.session.findUnique({
+    return await this.prisma.client.session.findUnique({
       where: { id },
     });
   }
 
   async revokeSessionTokens(sessionId: string) {
     this.logger.log(`Revoking tokens for session: ${sessionId}`);
-    return this.prisma.token.updateMany({
+    return await this.prisma.client.token.updateMany({
       where: { sessionId: sessionId, revokedAt: null },
       data: { revokedAt: new Date() },
     });

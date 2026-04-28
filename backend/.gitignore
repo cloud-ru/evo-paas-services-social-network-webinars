@@ -37,5 +37,11 @@ lerna-debug.log*
 .env
 .env.test
 
-# NestJS
+# Agents
 
+.agents/*
+.agent/*
+skills-lock.json
+
+# Text files
+*.txt

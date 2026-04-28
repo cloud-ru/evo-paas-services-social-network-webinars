@@ -47,7 +47,8 @@ services:
     ports:
       - '3001:3001'
     depends_on:
-      - postgres
+      migration:
+        condition: service_completed_successfully
 
   email:
     build:
@@ -67,7 +68,8 @@ services:
     ports:
       - '3003:3003'
     depends_on:
-      - postgres
+      migration:
+        condition: service_completed_successfully
 
   message:
     build:
@@ -78,7 +80,8 @@ services:
     ports:
       - '3004:3004'
     depends_on:
-      - postgres
+      migration:
+        condition: service_completed_successfully
 
   post:
     build:
@@ -88,6 +91,16 @@ services:
       - .env
     ports:
       - '3005:3005'
+    depends_on:
+      migration:
+        condition: service_completed_successfully
+
+  migration:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    env_file:
+      - .env
     depends_on:
       - postgres
 

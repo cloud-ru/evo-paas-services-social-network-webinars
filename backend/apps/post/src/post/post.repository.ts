@@ -13,7 +13,7 @@ export class PostRepository {
   ): Promise<Post & { files: PostFile[] }> {
     const { content, fileUrls } = data;
 
-    return this.prisma.post.create({
+    return await this.prisma.client.post.create({
       data: {
         content,
         authorId,
@@ -35,8 +35,8 @@ export class PostRepository {
   ): Promise<
     [(Post & { files: PostFile[]; likes: { userId: string }[] })[], number]
   > {
-    return this.prisma.$transaction([
-      this.prisma.post.findMany({
+    return await this.prisma.client.$transaction([
+      this.prisma.client.post.findMany({
         where: {
           ...(authorId && { authorId }),
         },
@@ -59,7 +59,7 @@ export class PostRepository {
           },
         },
       }),
-      this.prisma.post.count({
+      this.prisma.client.post.count({
         where: {
           ...(authorId && { authorId }),
         },
@@ -73,7 +73,7 @@ export class PostRepository {
   ): Promise<
     (Post & { files: PostFile[]; likes: { userId: string }[] }) | null
   > {
-    return this.prisma.post.findUnique({
+    return await this.prisma.client.post.findUnique({
       where: { id },
       select: {
         id: true,
@@ -93,14 +93,14 @@ export class PostRepository {
 
   async like(postId: string, userId: string): Promise<number> {
     try {
-      const [, post] = await this.prisma.$transaction([
-        this.prisma.like.create({
+      const [, post] = await this.prisma.client.$transaction([
+        this.prisma.client.like.create({
           data: {
             postId,
             userId,
           },
         }),
-        this.prisma.post.update({
+        this.prisma.client.post.update({
           where: { id: postId },
           data: { likesCount: { increment: 1 } },
         }),
@@ -109,7 +109,7 @@ export class PostRepository {
     } catch (error) {
       if ((error as { code: string }).code === 'P2002') {
         // Already liked, return current count
-        const post = await this.prisma.post.findUnique({
+        const post = await this.prisma.client.post.findUnique({
           where: { id: postId },
           select: { likesCount: true },
         });
@@ -121,8 +121,8 @@ export class PostRepository {
 
   async unlike(postId: string, userId: string): Promise<number> {
     try {
-      const [, post] = await this.prisma.$transaction([
-        this.prisma.like.delete({
+      const [, post] = await this.prisma.client.$transaction([
+        this.prisma.client.like.delete({
           where: {
             postId_userId: {
               postId,
@@ -130,7 +130,7 @@ export class PostRepository {
             },
           },
         }),
-        this.prisma.post.update({
+        this.prisma.client.post.update({
           where: { id: postId },
           data: { likesCount: { decrement: 1 } },
         }),
@@ -139,7 +139,7 @@ export class PostRepository {
     } catch (error) {
       if ((error as { code: string }).code === 'P2025') {
         // Like not found, return current count
-        const post = await this.prisma.post.findUnique({
+        const post = await this.prisma.client.post.findUnique({
           where: { id: postId },
           select: { likesCount: true },
         });
@@ -154,15 +154,15 @@ export class PostRepository {
     limit: number,
     offset: number,
   ): Promise<[{ userId: string; createdAt: Date }[], number]> {
-    return this.prisma.$transaction([
-      this.prisma.like.findMany({
+    return await this.prisma.client.$transaction([
+      this.prisma.client.like.findMany({
         where: { postId },
         take: limit,
         skip: offset,
         orderBy: { createdAt: 'desc' },
         select: { userId: true, createdAt: true },
       }),
-      this.prisma.like.count({ where: { postId } }),
+      this.prisma.client.like.count({ where: { postId } }),
     ]);
   }
 }
