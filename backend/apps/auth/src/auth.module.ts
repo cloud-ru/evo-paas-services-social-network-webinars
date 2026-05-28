@@ -4,11 +4,14 @@ import { AuthService } from './auth.service';
 import { AuthRepository } from './auth.repository';
 import { PrismaService } from './prisma.service';
 import { RateLimitService } from './rate-limit.service';
+import { RedisTokenStore } from '../../../libs/redis/redis-token-store.service';
+import { RedisModule } from '../../../libs/redis/redis.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    RedisModule,
     ClientsModule.register([
       {
         name: 'EMAIL_SERVICE',
@@ -34,6 +37,12 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, PrismaService, RateLimitService],
+  providers: [
+    AuthService,
+    AuthRepository,
+    PrismaService,
+    RateLimitService,
+    RedisTokenStore,
+  ],
 })
 export class AuthModule {}

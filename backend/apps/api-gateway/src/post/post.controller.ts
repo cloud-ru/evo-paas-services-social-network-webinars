@@ -16,6 +16,8 @@ import {
   Query,
   Param,
 } from '@nestjs/common';
+import 'multer';
+import { Cached } from '../../../../libs/cache/cache.decorator';
 import { Request } from 'express';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -28,6 +30,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { InvalidateCache } from '../../../../libs/cache/invalidate-cache.decorator';
 import {
   CreatePostDto,
   PostResponseDto,
@@ -174,7 +177,8 @@ export class PostController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get single post' })
+  @Cached(60, 'post')
+  @ApiOperation({ summary: 'Get single post [CACHED]' })
   @ApiResponse({
     status: 200,
     description: 'Returns post with author info',
@@ -312,7 +316,8 @@ export class PostController {
   }
 
   @Post(':id/like')
-  @ApiOperation({ summary: 'Like a post' })
+  @InvalidateCache('res:post:{id}')
+  @ApiOperation({ summary: 'Like a post [INVALIDATES CACHE]' })
   @ApiResponse({
     status: 201,
     description: 'Post liked successfully',
@@ -340,7 +345,8 @@ export class PostController {
   }
 
   @Delete(':id/like')
-  @ApiOperation({ summary: 'Unlike a post' })
+  @InvalidateCache('res:post:{id}')
+  @ApiOperation({ summary: 'Unlike a post [INVALIDATES CACHE]' })
   @ApiResponse({
     status: 200,
     description: 'Post disliked successfully',

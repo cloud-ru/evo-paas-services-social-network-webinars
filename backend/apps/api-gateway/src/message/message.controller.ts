@@ -11,6 +11,7 @@ import {
   Query,
   Delete,
 } from '@nestjs/common';
+import { Cached } from '../../../../libs/cache/cache.decorator';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   ApiTags,
@@ -22,6 +23,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { InvalidateCache } from '../../../../libs/cache/invalidate-cache.decorator';
 import {
   CreateMessageDto,
   MessageResponseDto,
@@ -74,6 +76,7 @@ export class MessageController {
 
   @Post()
   @UseGuards(AuthGuard)
+  @InvalidateCache('res:msg:unread:{userId}', 'res:msg:unread:{recipientId}')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send a direct message' })
   @ApiResponse({
@@ -161,6 +164,7 @@ export class MessageController {
 
   @Get('unread')
   @UseGuards(AuthGuard)
+  @Cached(15, 'msg:unread')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get count of unread messages' })
   @ApiResponse({
@@ -228,6 +232,7 @@ export class MessageController {
 
   @Delete(':messageId')
   @UseGuards(AuthGuard)
+  @InvalidateCache('res:msg:unread:{userId}')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a message' })
   @ApiParam({ name: 'messageId', description: 'ID of the message to delete' })

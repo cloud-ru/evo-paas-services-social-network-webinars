@@ -23,7 +23,7 @@
 2. **kubectl**: Настроенный для подключения к вашему кластеру
 3. **Ingress Controller**: Установленный NGINX Ingress Controller
 4. **Storage Class**: Класс хранения по умолчанию (названный "standard" в манифестах)
-5. **Container Registry**: Доступ к реестру `registry_name.cr.cloud.ru`
+5. **Container Registry**: Доступ к реестру `evo-social-network-sedg1l.cr.cloud.ru`
 
 ## Быстрый старт
 

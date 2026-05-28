@@ -1,112 +1,95 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { RedisCacheService } from '../../../libs/redis/redis-cache.service';
 
 /**
- * Interface for tracking failed login attempts
- */
-interface FailedAttempt {
-  count: number;
-  firstAttemptAt: Date;
-}
-
-/**
- * In-memory rate limiting service for login attempts
- * Tracks failed login attempts per email address
+ * Redis-backed rate limiting service.
+ *
+ * Replaces the in-memory Map with shared Redis counters so that rate
+ * limits are consistent across multiple auth-service replicas.
  */
 @Injectable()
 export class RateLimitService {
   private readonly logger = new Logger(RateLimitService.name);
-  private readonly failedAttempts = new Map<string, FailedAttempt>();
-  private readonly genericRateLimits = new Map<string, number[]>();
   private readonly maxAttempts = 5;
-  private readonly windowMinutes = 15;
+  private readonly windowSeconds = 15 * 60; // 15 minutes
+
+  constructor(private readonly cache: RedisCacheService) {}
 
   /**
-   * Check if email is rate limited
-   * @param email User email address
-   * @returns true if rate limited, false otherwise
+   * Check if the given key (email) is rate-limited for login.
    */
-  isRateLimited(email: string): boolean {
-    const attempt = this.failedAttempts.get(email);
-    if (!attempt) {
-      return false;
-    }
-    const windowStart = new Date();
-    windowStart.setMinutes(windowStart.getMinutes() - this.windowMinutes);
-    if (attempt.firstAttemptAt < windowStart) {
-      this.failedAttempts.delete(email);
-      return false;
-    }
-    if (attempt.count >= this.maxAttempts) {
-      this.logger.warn(
-        `Rate limit exceeded for email: ${email} (${attempt.count} attempts)`,
+  async isRateLimited(key: string): Promise<boolean> {
+    try {
+      const count = await this.cache.get<number>(
+        `ratelimit:login:${key}`,
       );
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Record a failed login attempt
-   * @param email User email address
-   */
-  recordFailedAttempt(email: string): void {
-    const existing = this.failedAttempts.get(email);
-    if (existing) {
-      const windowStart = new Date();
-      windowStart.setMinutes(windowStart.getMinutes() - this.windowMinutes);
-      if (existing.firstAttemptAt < windowStart) {
-        this.failedAttempts.set(email, {
-          count: 1,
-          firstAttemptAt: new Date(),
-        });
-      } else {
-        existing.count += 1;
+      if (count !== null && count >= this.maxAttempts) {
+        this.logger.warn(
+          `Rate limit exceeded for key: ${key} (${count} attempts)`,
+        );
+        return true;
       }
-    } else {
-      this.failedAttempts.set(email, {
-        count: 1,
-        firstAttemptAt: new Date(),
-      });
-    }
-    this.logger.log(
-      `Failed login attempt recorded for ${email}: ${this.failedAttempts.get(email)?.count || 0} attempts`,
-    );
-  }
-
-  /**
-   * Clear failed attempts for email (called on successful login)
-   * @param email User email address
-   */
-  clearFailedAttempts(email: string): void {
-    if (this.failedAttempts.has(email)) {
-      this.failedAttempts.delete(email);
-      this.logger.log(`Cleared failed login attempts for ${email}`);
+      return false;
+    } catch (err) {
+      this.logger.error(`Rate limit check failed for ${key}: ${err}`);
+      // On Redis error, allow the request (fail open)
+      return false;
     }
   }
 
   /**
-   * Generic rate limiter
-   * @param key Unique key for the action (e.g., "forgot_password:email@example.com")
-   * @param limit Maximum number of requests allowed
-   * @param windowSeconds Time window in seconds
-   * @returns true if rate limited, false otherwise
+   * Record a failed login attempt and return the new count.
    */
-  checkRateLimit(key: string, limit: number, windowSeconds: number): boolean {
-    const now = Date.now();
-    const windowMs = windowSeconds * 1000;
-
-    const timestamps = this.genericRateLimits.get(key) || [];
-    const validTimestamps = timestamps.filter((ts) => now - ts < windowMs);
-
-    if (validTimestamps.length >= limit) {
-      this.logger.warn(
-        `Rate limit exceeded for key: ${key} (${validTimestamps.length} attempts)`,
+  async recordFailedAttempt(key: string): Promise<void> {
+    try {
+      const newCount = await this.cache.increment(
+        `ratelimit:login:${key}`,
+        this.windowSeconds,
       );
-      return true;
+      this.logger.log(
+        `Failed login attempt recorded for ${key}: ${newCount} attempts`,
+      );
+    } catch (err) {
+      this.logger.error(`Failed to record attempt for ${key}: ${err}`);
     }
+  }
 
-    validTimestamps.push(now);
-    this.genericRateLimits.set(key, validTimestamps);
-    return false;
+  /**
+   * Clear failed attempts (called on successful login).
+   */
+  async clearFailedAttempts(key: string): Promise<void> {
+    try {
+      await this.cache.delete(`ratelimit:login:${key}`);
+      this.logger.log(`Cleared failed login attempts for ${key}`);
+    } catch (err) {
+      this.logger.error(`Failed to clear attempts for ${key}: ${err}`);
+    }
+  }
+
+  /**
+   * Generic rate limiter for arbitrary actions (e.g. forgot-password).
+   */
+  async checkRateLimit(
+    key: string,
+    limit: number,
+    windowSeconds: number,
+  ): Promise<boolean> {
+    try {
+      const nsKey = `ratelimit:${key}`;
+      const current = await this.cache.get<number>(nsKey);
+
+      if (current !== null && current >= limit) {
+        this.logger.warn(
+          `Rate limit exceeded for ${key} (${current}/${limit})`,
+        );
+        return true;
+      }
+
+      await this.cache.increment(nsKey, windowSeconds);
+      return false;
+    } catch (err) {
+      this.logger.error(`Rate limit check failed for ${key}: ${err}`);
+      return false; // fail open
+    }
   }
 }

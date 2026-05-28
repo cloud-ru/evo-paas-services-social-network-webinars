@@ -49,6 +49,8 @@ required_vars=(
     "MINIO_ROOT_USER"
     "MINIO_ROOT_PASSWORD"
     "SMTP_PASSWORD"
+    "REDIS_USER"
+    "REDIS_PASSWORD"
     "S3_ACCESS_KEY_ID"
     "S3_SECRET_ACCESS_KEY"
 )
@@ -107,6 +109,10 @@ data:
   # SMTP Password (base64 encoded)
   SMTP_PASSWORD: $(echo -n "$SMTP_PASSWORD" | base64 -w 0)
   
+  # Redis credentials (base64 encoded)
+  REDIS_USER: $(echo -n "$REDIS_USER" | base64 -w 0)
+  REDIS_PASSWORD: $(echo -n "$REDIS_PASSWORD" | base64 -w 0)
+
   # S3 credentials (base64 encoded)
   S3_ACCESS_KEY_ID: $(echo -n "$S3_ACCESS_KEY_ID" | base64 -w 0)
   S3_SECRET_ACCESS_KEY: $(echo -n "$S3_SECRET_ACCESS_KEY" | base64 -w 0)

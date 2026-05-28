@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ApiGatewayController } from './api-gateway.controller';
 import { ApiGatewayService } from './api-gateway.service';
 import { AuthController } from './auth/auth.controller';
@@ -11,9 +12,12 @@ import { MessageController } from './message/message.controller';
 import { PostController } from './post/post.controller';
 import { FileController } from './file/file.controller';
 import { ChatGateway } from './chat.gateway';
+import { RedisModule } from '../../../libs/redis/redis.module';
+import { CacheInterceptor } from '../../../libs/cache/cache.interceptor';
 
 @Module({
   imports: [
+    RedisModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
@@ -83,6 +87,14 @@ import { ChatGateway } from './chat.gateway';
     PostController,
     FileController,
   ],
-  providers: [ApiGatewayService, ChatGateway],
+  providers: [
+    ApiGatewayService,
+    ChatGateway,
+    CacheInterceptor,
+    {
+      provide: APP_INTERCEPTOR,
+      useExisting: CacheInterceptor,
+    },
+  ],
 })
 export class ApiGatewayModule {}

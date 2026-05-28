@@ -1,6 +1,7 @@
 import { Injectable, Logger, Inject } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { RateLimitService } from './rate-limit.service';
+import { RedisTokenStore } from '../../../libs/redis/redis-token-store.service';
 import {
   RegisterRequestDto,
   RegisterResponseDto,
@@ -33,6 +34,7 @@ export class AuthService {
     private readonly authRepository: AuthRepository,
     private readonly jwtService: JwtService,
     private readonly rateLimitService: RateLimitService,
+    private readonly tokenStore: RedisTokenStore,
     @Inject('EMAIL_SERVICE') private readonly emailClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
   ) {}
@@ -194,7 +196,7 @@ export class AuthService {
   ): Promise<LoginResponseDto> {
     this.logger.log(`Login attempt for email: ${dto.email}`);
     const email = dto.email.toLowerCase();
-    if (this.rateLimitService.isRateLimited(email)) {
+    if (await this.rateLimitService.isRateLimited(email)) {
       this.logger.warn(`Rate limit exceeded for email: ${email}`);
       throw new RpcException({
         statusCode: 429,
@@ -273,6 +275,22 @@ export class AuthService {
         refreshTokenExpiresAt,
       },
     );
+
+    // Cache token metadata in Redis for fast validation
+    try {
+      await this.tokenStore.setToken(
+        accessToken,
+        {
+          userId: user.id,
+          sessionId: result.session.id,
+          expiresAt: Math.floor(accessTokenExpiresAt.getTime() / 1000),
+          revoked: false,
+        },
+        accessTokenExpiresIn,
+      );
+    } catch (err) {
+      this.logger.warn(`Failed to cache token in Redis: ${err}`);
+    }
 
     this.logger.log(
       `User logged in successfully: ${user.id}, session: ${result.session.id}`,
@@ -360,6 +378,22 @@ export class AuthService {
       accessTokenExpiresAt,
     });
 
+    // Cache the new token in Redis
+    try {
+      await this.tokenStore.setToken(
+        accessToken,
+        {
+          userId: tokenRecord.userId,
+          sessionId: tokenRecord.sessionId,
+          expiresAt: Math.floor(accessTokenExpiresAt.getTime() / 1000),
+          revoked: false,
+        },
+        accessTokenExpiresIn,
+      );
+    } catch (err) {
+      this.logger.warn(`Failed to cache refreshed token in Redis: ${err}`);
+    }
+
     this.logger.log(
       `Token refreshed successfully for user: ${tokenRecord.userId}`,
     );
@@ -420,8 +454,15 @@ export class AuthService {
       };
     }
 
-    // 2. Revoke token
+    // 2. Revoke token in DB
     await this.authRepository.revokeToken(tokenRecord.id);
+
+    // 3. Delete from Redis
+    try {
+      await this.tokenStore.revokeToken(dto.accessToken);
+    } catch (err) {
+      this.logger.warn(`Failed to revoke token in Redis: ${err}`);
+    }
 
     this.logger.log(`Logout successful for user: ${tokenRecord.userId}`);
 
@@ -434,6 +475,26 @@ export class AuthService {
   }
 
   async validateToken(accessToken: string): Promise<boolean> {
+    // 1. Try Redis first (fast path)
+    try {
+      const cached = await this.tokenStore.getToken(accessToken);
+      if (cached !== null) {
+        if (cached.revoked) {
+          this.logger.warn(`Token revoked (Redis): ${accessToken.substring(0, 8)}...`);
+          return false;
+        }
+        // Check expiry
+        if (cached.expiresAt < Math.floor(Date.now() / 1000)) {
+          this.logger.warn(`Token expired (Redis): ${accessToken.substring(0, 8)}...`);
+          return false;
+        }
+        return true;
+      }
+    } catch (err) {
+      this.logger.warn(`Redis validateToken error, falling back to DB: ${err}`);
+    }
+
+    // 2. Fall back to PostgreSQL (cold start / Redis failure)
     const tokenRecord =
       await this.authRepository.findTokenByAccessToken(accessToken);
 
@@ -443,6 +504,30 @@ export class AuthService {
 
     if (tokenRecord.revokedAt) {
       return false;
+    }
+
+    // Repopulate Redis cache for next request
+    try {
+      const ttl = Math.max(
+        1,
+        Math.floor(
+          (tokenRecord.accessTokenExpiresAt.getTime() - Date.now()) / 1000,
+        ),
+      );
+      await this.tokenStore.setToken(
+        accessToken,
+        {
+          userId: tokenRecord.userId,
+          sessionId: tokenRecord.sessionId,
+          expiresAt: Math.floor(
+            tokenRecord.accessTokenExpiresAt.getTime() / 1000,
+          ),
+          revoked: false,
+        },
+        ttl,
+      );
+    } catch (err) {
+      this.logger.warn(`Failed to repopulate token in Redis: ${err}`);
     }
 
     return true;
@@ -455,7 +540,7 @@ export class AuthService {
 
     // 1. Check rate limit (3 requests per hour)
     const rateLimitKey = `forgot_password:${dto.email}`;
-    if (this.rateLimitService.checkRateLimit(rateLimitKey, 3, 3600)) {
+    if (await this.rateLimitService.checkRateLimit(rateLimitKey, 3, 3600)) {
       throw new RpcException({
         statusCode: 429,
         status: 429,

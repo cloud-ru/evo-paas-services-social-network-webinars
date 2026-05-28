@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: registry_name.cr.cloud.ru/social-network-api-gateway:latest
+          image: evo-social-network-sedg1l.cr.cloud.ru/social-network-api-gateway:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -121,6 +121,26 @@ spec:
                 configMapKeyRef:
                   name: social-network-config
                   key: FILE_PORT
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: REDIS_HOST
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: social-network-config
+                  key: REDIS_PORT
+            - name: REDIS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: REDIS_USER
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: social-network-secrets
+                  key: REDIS_PASSWORD
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:

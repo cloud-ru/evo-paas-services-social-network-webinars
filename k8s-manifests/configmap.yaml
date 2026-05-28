@@ -44,6 +44,10 @@ data:
   S3_ENDPOINT: "http://minio:9000"
   S3_PUBLIC_URL: "http://minio:9000"
   
+  # Redis Configuration
+  REDIS_HOST: "10.0.102.11"
+  REDIS_PORT: "6379"
+  
   # JWT Configuration
   JWT_EXPIRATION: "15m"
   REFRESH_TOKEN_EXPIRATION: "7d"

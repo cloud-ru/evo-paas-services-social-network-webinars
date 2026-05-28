@@ -16,6 +16,8 @@ import {
   ParseFilePipeBuilder,
   Query,
 } from '@nestjs/common';
+import 'multer';
+import { Cached } from '../../../../libs/cache/cache.decorator';
 import { Request } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ClientProxy } from '@nestjs/microservices';
@@ -42,6 +44,7 @@ import {
   UserProfileDto,
 } from '@app/types';
 import { AuthGuard } from '../auth/guards/auth.guard';
+import { InvalidateCache } from '../../../../libs/cache/invalidate-cache.decorator';
 
 @ApiTags('User')
 @Controller('users')
@@ -79,6 +82,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get('me')
+  @Cached(300, 'user:me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({
@@ -108,6 +112,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Put('me')
+  @InvalidateCache('res:user:me:{userId}', 'res:user:profile:{userId}')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiBody({ type: UpdateUserProfileDto })
@@ -139,6 +144,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Post('me/avatar')
+  @InvalidateCache('res:user:me:{userId}', 'res:user:profile:{userId}')
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload user avatar' })
@@ -210,6 +216,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Put(':userId/status')
+  @InvalidateCache('res:user:status:{userId}')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update user status' })
   @ApiBody({ type: UpdateUserStatusDto })
@@ -253,6 +260,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get(':userId/status')
+  @Cached(30, 'user:status')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user online status' })
   @ApiResponse({
@@ -343,6 +351,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Get(':userId')
+  @Cached(300, 'user:profile')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get user profile by ID' })
   @ApiResponse({

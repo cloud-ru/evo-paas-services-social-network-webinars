@@ -16,6 +16,7 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
+import { Cached } from '../../../../libs/cache/cache.decorator';
 
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -49,6 +50,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import type { Request, Response } from 'express';
 import { AuthGuard } from './guards/auth.guard';
+import { InvalidateCache } from '../../../../libs/cache/invalidate-cache.decorator';
 
 interface AuthRequest extends Request {
   user: AuthenticatedUser;
@@ -280,6 +282,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @InvalidateCache('res:auth:sessions:{userId}')
   @ApiOperation({
     summary: 'Logout user',
     description: 'Logs out the user, invalidates tokens, and clears session.',
@@ -397,7 +400,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get('sessions')
-  @ApiOperation({ summary: 'List all active sessions' })
+  @Cached(120, 'auth:sessions')
+  @ApiOperation({ summary: 'List all active sessions [CACHED]' })
   @ApiResponse({
     status: 200,
     description: 'Sessions retrieved successfully',
@@ -424,7 +428,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Delete('sessions/:sessionId')
-  @ApiOperation({ summary: 'Revoke a session' })
+  @InvalidateCache('res:auth:sessions:{userId}')
+  @ApiOperation({ summary: 'Revoke a session [INVALIDATES CACHE]' })
   @ApiResponse({
     status: 200,
     description: 'Session revoked successfully',

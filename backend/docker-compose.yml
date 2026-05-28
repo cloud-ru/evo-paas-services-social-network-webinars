@@ -1,4 +1,12 @@
 services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
   postgres:
     image: postgres:15-alpine
     restart: always
@@ -103,5 +111,6 @@ services:
       - minio
 
 volumes:
+  redis_data:
   postgres_data:
   minio_data:

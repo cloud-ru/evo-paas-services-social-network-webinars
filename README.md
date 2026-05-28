@@ -1,135 +1,133 @@
-# Демонстрационная Социальная Сеть
+# cloudlogin
 
-Это демонстрационное приложение социальной сети, разработанное для серии вебинаров. Проект состоит из микросервисного бэкенда на NestJS и современного фронтенда на Next.js.
+Утилита для получения и обновления пользовательского токена на основе персональных ключей доступа Cloud.ru.
+Необходима при подключении к кластеру Evolution Managed Kubernetes.
 
-## Обзор Проекта
+При работе с kubectl утилита cloudlogin будет автоматически запрашивать и обновлять токен для подключения к кластеру. 
+Если токен валидный, пользователь получит доступ к кластеру. 
+При просроченом токене cloudlogin перевыпустит его.
 
-Приложение включает в себя следующие возможности:
+## Установка и настройка
+ 
+1. Скачайте cloudlogin для вашей операционной системы.
 
-- **Аутентификация**: Вход и регистрация пользователей.
-- **Лента новостей**: Просмотр постов, поддержка медиафайлов.
-- **Профили**: Управление профилем пользователя, аватары, биография.
-- **Чат**: Обмен сообщениями в реальном времени.
-- **Файловое хранилище**: Загрузка и хранение файлов (S3/MinIO).
+1. Настройте cloudlogin для выполнения.
+ 
+   **Linux или macOS**
+   
+   1. Распакуйте загруженный архив:
+   
+      ```shell
+	  tar -xzf <archive_name>
+	  ```
+	  
+	  Где `<archive_name>` — название загруженного архива. 
+	  Например, `cloudlogin_Linux_amd64.tar.gz`.
+   
+   
+   1. Переместите файл cloudlogin в директорию /usr/local/bin:
+   
+	  ```shell
+	  sudo mv cloudlogin /usr/local/bin
+	  ```	  
+   
+   **Windows**
+   
+   1. Распакуйте загруженный архив в директорию cloudlogin.
+   
+   1. Переместите директорию cloudlogin в C:\Program Files.
 
-## Структура Репозитория
+   1. Добавьте путь к cloudlogin в переменную окружения PATH.
+   
+   
+1. Проверьте работу утилиты, выполнив:
 
-Репозиторий разделен на две основные части:
+   ```shell
+   cloudlogin help
+   ```
+   
+   Если утилита установлена правильно, будет доступна справочная информация о работе с ней.
+   
+## Настройка kubeconfig
 
-- **`backend/`**: Микросервисная архитектура на NestJS (7 сервисов), использующая PostgreSQL и Prisma.
-  - [Подробнее о бэкенде](./backend/README.md)
-- **`frontend/`**: Клиентское приложение на Next.js (App Router) с использованием React, Tailwind CSS и Shadcn UI.
-  - [Подробнее о фронтенде](./frontend/README.md)
+1. [Получите kubeconfig вашего кластера](https://cloud.ru/ru/docs/kubernetes-evolution/ug/topics/guides__cluster__download-kubeconfig.html).
 
-## Быстрый Старт
+1. [Создайте персональный ключ доступа](https://cloud.ru/ru/docs/console_api/ug/topics/guides__api_key.html), если еще не создавали.
 
-Для запуска полного стека приложения (бэкенд + фронтенд) выполните следующие шаги:
+1. Пропишите в kubeconfig персональный ключ доступа одним из способов:
 
-### 1. Запуск Бэкенда
+   **Способ 1**
 
-**Предварительная настройка:**
-Замените `registry_name` на имя вашего репозитория в Artifact Registry во всех Dockerfile и скриптах деплоя.
+   Последовательно выполните:
+   
+   ```shell
+   export CLOUDRU_KEY_ID=<Key_ID>
+   export CLOUDRU_SECRET_ID=<Key_Secret>
+   ```
+	  
+   Где `<Key_ID>` и `<Key_Secret>` — персональные ключи доступа.
 
-**Деплой базовых образов (обязательно):**
-```bash
-cd backend
-yarn deploy:base
+   **Способ 2**
+   
+   Откройте конфигурационный файл kubeconfig и заполните значения для `CLOUDRU_KEY_ID` и `CLOUDRU_SECRET_ID`.
+   
+   ```yaml  
+   env:
+    - name: CLOUDRU_KEY_ID
+      value: "<Key_ID>"
+    - name: CLOUDRU_SECRET_ID
+      value: "<Key_Secret>"
+   ```
+	  
+   Где `<Key_ID>` и `<Key_Secret>` — персональные ключи доступа.
+
+   Конфигурационный файл kubeconfig готов к использованию.
+	  
+1. Проверьте подключение:
+
+   ```shell
+   kubectl cluster-info
+   ``` 	  
+
+При вызове kubectl для `CLOUDRU_KEY_ID` и `CLOUDRU_SECRET_ID` будет получен токен, который кешируется в файл `$HOME/.cloudru/.token`. 
+
+## Посмотреть пользовательский токен
+
+Если требуется посметреть токен, в командной строке выполните:
+
+```shell
+cloudlogin get-token
 ```
 
-Эта команда соберет и отправит базовые образы (`base-build` и `base-run`) в реестр `registry_name.cr.cloud.ru`.
 
-#### Для локальной разработки (Docker Compose):
+## Конвертирование kubeconfig
 
-Перейдите в директорию `backend`, установите зависимости, настройте переменные окружения и запустите сервисы:
+С помощью cloudlogin можно конвертировать ранее загруженный kubeconfig в правильный формат.
 
-```bash
-cd backend
-yarn
-cp env.example .env
-# Настройте .env при необходимости
-yarn start
-```
+В командной строке выполните:
 
-Это поднимет все микросервисы, базы данных PostgreSQL и MinIO.
+```shell
+cloudlogin convert-kubeconfig --kubeconfig <kubeconfig_path> --username <user> --iam-url <iam_url>
+```   
 
-#### Для развертывания в Kubernetes:
+Где:
 
-Бэкенд сервисы не используют .env файлы в Kubernetes. Вместо этого, все переменные окружения передаются через:
-- **ConfigMaps** (`k8s-manifests/configmap.yaml`) - для неконфиденциальных данных
-- **Secrets** - для конфиденциальных данных (пароли, токены)
+- `--kubeconfig <kubeconfig_path>` — путь к kubeconfig.
 
-**Управление секретами:**
+  Опциональный параметр. По умолчанию — `--kubeconfig $HOME/.kube/config`.
 
-Для безопасного управления секретами в Kubernetes без их хардкодинга:
+- `--username <user>` — идентификатор пользователя, для которого необходимо преобразовать kubeconfig.
 
-1. **Создайте файл с секретами:**
-   ```bash
-   cd k8s-manifests
-   cp .env.secrets.template .env.secrets
-   # Отредактируйте .env.secrets с вашими реальными значениями
+   Чтобы посмотреть идентификатор пользователя <user>, выполните:
+   
+   ```shell
+   kubectl config get-users
    ```
 
-2. **Сгенерируйте secret.yaml:**
-   ```bash
-   ./generate-secrets.sh
-   ```
+   Можно не указывать, если kubeconfig предназначен только для одного пользователя.
 
-   Эта команда прочитает значения из `.env.secrets` и создаст `secret.yaml` с закодированными в base64 значениями.
+- `--iam-url <iam_url>` — эндпоинт для получения токенов доступа.
 
-3. **Примените секреты:**
-   ```bash
-   kubectl apply -f secret.yaml
-   ```
+   Опциональный параметр. По умолчанию — `--iam-url https://id.cloud.ru/auth/system/openid/token`.
 
-**Важно:** Файл `.env.secrets` добавлен в `.gitignore`, чтобы избежать коммита секретов в репозиторий.
-
-Dockerfile'ы бэкенд сервисов не копируют .env файлы, что обеспечивает чистое разделение конфигурации между окружениями.
-
-### 2. Запуск Фронтенда
-
-#### Для локальной разработки:
-
-В новом терминале перейдите в директорию `frontend`, установите зависимости и запустите сервер разработки:
-
-```bash
-cd frontend
-yarn install
-cp env.example .env.local
-# Настройте .env.local при необходимости
-yarn dev
-```
-
-Приложение будет доступно по адресу [http://localhost:3007](http://localhost:3007).
-
-#### Для развертывания в Kubernetes:
-
-При сборке Docker-образа для Kubernetes используется специальный файл окружения `.env.k8s`, который содержит настройки для production-среды:
-
-```bash
-# Файл: frontend/.env.k8s
-NEXT_PUBLIC_API_URL=http://api.social-network.local
-```
-
-Этот файл автоматически копируется в `.env.production` во время сборки образа (см. `Dockerfile`). Это обеспечивает правильную конфигурацию API URL для работы в Kubernetes-кластере.
-
-**Важно:** Не используйте `.env.k8s` для локальной разработки, так как он содержит настройки для production-среды.
-
-## Технологический Стек
-
-### Backend
-
-- **Framework**: NestJS
-- **Database**: PostgreSQL, Prisma ORM
-- **Microservices**: TCP transport
-- **Storage**: MinIO (S3 compatible)
-
-### Frontend
-
-- **Framework**: Next.js 16
-- **UI**: React 19, Shadcn UI, Tailwind CSS v4
-- **State**: React Query
-- **Forms**: React Hook Form, Zod
-
-## Лицензия
-
-MIT
+Далее необходимо настроить kubeconfig.
